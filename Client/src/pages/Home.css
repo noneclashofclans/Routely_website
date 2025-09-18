@@ -1,0 +1,208 @@
+:root {
+  --primary-color: #4A90E2;
+  --dark-color: #2c3e50;
+  --light-gray-color: #f7f9fa;
+  --text-color: #555;
+  --white-color: #ffffff;
+  --border-color: #e1e4e8;
+  --shadow-color: rgba(0, 0, 0, 0.08);
+}
+
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  color: var(--text-color);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--light-gray-color);
+}
+
+
+.home-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+.header {
+    height: 70px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2.5%;
+    background-color: var(--white-color);
+    box-shadow: 0 2px 4px var(--shadow-color);
+    z-index: 10;
+    flex-shrink: 0;
+}
+
+.logo-container {
+    cursor: pointer;
+}
+
+.user-profile {
+    padding: 8px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.user-profile:hover {
+    background-color: var(--light-gray-color);
+}
+
+.main-content {
+    display: flex;
+    flex: 1;
+    overflow: hidden; 
+}
+
+
+.sidebar {
+    width: 400px;
+    background-color: var(--white-color);
+    padding: 30px;
+    box-shadow: 4px 0 10px rgba(0,0,0,0.05);
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    flex-shrink: 0;
+}
+
+.sidebar h2 {
+    font-size: 1.8rem;
+    color: var(--dark-color);
+    margin-top: 0;
+    margin-bottom: 30px;
+}
+
+.ride-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.input-group {
+    position: relative;
+}
+
+.input-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+}
+
+.input-field {
+    width: 100%;
+    padding: 14px 14px 14px 45px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: 'Poppins', sans-serif;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    box-sizing: border-box;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+}
+
+.logo3 {
+    height: 110px; 
+    width: auto;
+    margin: -15px 40px;
+    display: block;
+}
+
+.swap-button {
+    position: absolute;
+    right: -15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: var(--white-color);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+    color: var(--primary-color);
+}
+
+.swap-button:hover {
+    transform: translateY(-50%) rotate(180deg);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.submit-button {
+    background-color: rgb(14, 96, 227);
+    color: var(--white-color);
+    padding: 15px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.submit-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(36, 66, 101, 0.4);
+    filter: brightness(1.05);
+}
+
+
+.map-placeholder {
+    flex: 1;
+    background-color: #e0e0e0; 
+    background-image: url('https://i.stack.imgur.com/gJS0T.png');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.map-placeholder-text {
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 15px 30px;
+    border-radius: 10px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--dark-color);
+    backdrop-filter: blur(5px);
+}
+
+@media (max-width: 900px) {
+    .main-content {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+        height: auto;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        padding: 20px;
+        box-sizing: border-box;
+    }
+    .map-placeholder {
+        flex: 1; 
+    }
+}
+
