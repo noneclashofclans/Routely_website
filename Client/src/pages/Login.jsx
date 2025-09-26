@@ -4,7 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import './Login.css';
 import logo7 from '../assets/logo3.png';
 
-const LoginPage = () => {
+const LoginPage = () => {   
+
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -59,7 +60,7 @@ const LoginPage = () => {
                         <input type="password" id="password" name="password" value={formData.password} onChange={handleChange} required />
                     </div>
 
-                    <button type="submit" className="submit-btn" disabled={loading}>
+                    <button type="submit" className="submit-btn" disabled={loading} onClick={navigate('/home')}>
                         {loading ? 'Logging In...' : 'Log In'}
                     </button>
 

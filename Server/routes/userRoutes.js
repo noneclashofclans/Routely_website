@@ -1,7 +1,7 @@
 // user authentication
 const express = require('express')
 const router = express.Router();
-const user = require ('../models/userModel');
+const User = require ('../models/userModel');
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -44,7 +44,7 @@ router.post('/login', async(req, res) => {
 
         const { email, password } = req.body;
 
-        const user = await user.findOne({email});
+        const user = await User.findOne({email});
 
         if (!user) return res.status(500).json({message: 'Invalid valuess'});
 
@@ -54,7 +54,7 @@ router.post('/login', async(req, res) => {
             return res.json({message: "False values"});
         }
 
-        const payload = { userId: user._id };
+        const payload = { userEmail: user.email };
         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
         res.status(200).json({
