@@ -27,7 +27,7 @@ const Register = () => {
         setError('');
         setSuccess('');
 
-        // if entered password != previous one then error
+        
         if (formData.password != formData.confirmPassword) {
             setError('Passwords do not match. Please check the password you have typed.');
             return;

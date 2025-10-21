@@ -181,16 +181,11 @@ const Landing = () => {
           </div>
           <div className="step">
             <div className="stepIcon">2</div>
-            <h4>Compare Fares Instantly</h4>
-            <p>See real-time prices from all major ride apps.</p>
-          </div>
-          <div className="step">
-            <div className="stepIcon">3</div>
             <h4>Choose & Book</h4>
             <p>Pick the best option and ride smarter.</p>
           </div>
           <div className="step">
-            <div className="stepIcon">4</div>
+            <div className="stepIcon">3</div>
             <h4>Hassle-free payment</h4>
             <p>Pay your ride fees directly from our website!</p>
           </div>

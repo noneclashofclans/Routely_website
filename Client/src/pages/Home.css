@@ -172,38 +172,25 @@ body {
 .map-placeholder {
     flex: 1;
     background-color: #e0e0e0; 
-    background-image: url('https://i.stack.imgur.com/gJS0T.png');
-    background-size: cover;
-    background-position: center;
+    /* A placeholder, the map will cover this */
     display: flex;
     justify-content: center;
     align-items: center;
+    position: relative; 
+    min-height: 420px; 
 }
 
-.map-placeholder-text {
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 15px 30px;
-    border-radius: 10px;
-    font-size: 1.2rem;
+.map-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.72);
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 8px;
+    z-index: 50;
     font-weight: 600;
-    color: var(--dark-color);
-    backdrop-filter: blur(5px);
-}
-
-@media (max-width: 900px) {
-    .main-content {
-        flex-direction: column;
-    }
-    .sidebar {
-        width: 100%;
-        height: auto;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        padding: 20px;
-        box-sizing: border-box;
-    }
-    .map-placeholder {
-        flex: 1; 
-    }
 }
 
 .results-container {
@@ -289,3 +276,65 @@ body {
     margin-top: 2px;
 }
 
+/* --- Mobile Fixes Below --- */
+
+@media (max-width: 900px) {
+    .main-content {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background: var(--white-color);
+        border-radius: 20px 20px 0 0;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+        z-index: 100;
+        max-height: 85vh;
+        touch-action: none; /* Disables browser scrolling on the container */
+        display: flex;
+        flex-direction: column;
+        padding: 0; /* Remove padding from container */
+        box-sizing: border-box; /* Include padding/border in width */
+    }
+
+    .map-placeholder {
+        flex: 1; 
+    }
+
+    .drag-handle {
+        width: 100%;
+        padding: 15px 0;
+        display: flex;
+        justify-content: center;
+        cursor: grab;
+        touch-action: none; /* Also disable on handle */
+        flex-shrink: 0;
+    }
+
+    .drag-handle::before {
+        content: "";
+        width: 40px;
+        height: 5px;
+        background: #ccc;
+        border-radius: 3px;
+        display: block;
+    }
+
+    .sidebar-content {
+        padding: 0 20px 20px;
+        overflow-y: auto; /* Enables native scrolling for content */
+        flex-grow: 1;
+        min-height: 0; 
+
+        /* *** FIXED: Re-enables browser scrolling ONLY for this element *** */
+        touch-action: auto; 
+    }
+
+    /* Adjust form for mobile */
+    .sidebar h2 {
+        margin-bottom: 20px;
+    }
+}
