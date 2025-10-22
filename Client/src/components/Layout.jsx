@@ -11,7 +11,6 @@ const Layout = ({ children }) => {
   const overlayRef = useRef(null);
 
   const handleBackdropClick = (e) => {
-
     if (e.target === e.currentTarget || e.target === overlayRef.current) {
       navigate('/home');
     }

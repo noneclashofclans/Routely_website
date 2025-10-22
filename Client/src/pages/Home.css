@@ -337,6 +337,7 @@ body {
 }
 
 @media (max-width: 768px) {
+
     .header {
         padding: 0 15px;
         display: grid !important;

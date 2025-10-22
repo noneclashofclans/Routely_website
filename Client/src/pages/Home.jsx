@@ -316,7 +316,7 @@ const HomePage = () => {
           />
 
           <div className="sidebar-content">
-            <h2>Plan Your Ride</h2>
+             <h2 className='infos'>{window.innerWidth < 900 ? "Enter points" : "Plan Your Ride"}</h2>
             <form className="ride-form" onSubmit={handleSubmit}>
               <div className="input-group">
                 <span className="input-icon"><LocationPinIcon /></span>
