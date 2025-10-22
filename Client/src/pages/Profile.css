@@ -13,32 +13,45 @@
 body {
   font-family: 'Poppins', sans-serif;
   margin: 0;
+  background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
 }
 
 .profile-page {
-  min-height: 100vh;
+  min-height: auto;
   padding: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
-
-  background: linear-gradient(135deg, #1e2339, #153e80);
- 
+  width: 100%;
 }
 
 .profile-container {
-  /* This is the "glass" card */
-  background: rgba(255, 255, 255, 0.85); 
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border-radius: 20px;
   padding: 30px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   max-width: 500px;
-  width: 100%;
-  margin: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  max-height: 80vh;
+  width: 90%;
+  margin: 0;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  animation: modalSlideUp 0.3s ease-out;
+  overflow-y: auto;
 }
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 
 .profile-header {
   display: flex;
@@ -384,46 +397,41 @@ body {
 }
 
 @media (max-width: 768px) {
-  .profile-page {
-    padding: 10px;
-  }
-  
   .profile-container {
-    margin: 10px;
     padding: 20px;
-    box-shadow: 0 4px 16px var(--shadow-color);
+    max-width: 99%;
+    margin: 10px;
   }
-  
+
   .profile-header {
     flex-direction: column;
     text-align: center;
     gap: 20px;
-    /* Center the avatar section when stacked */
     align-items: center;
   }
-  
+
   .profile-stats {
     grid-template-columns: 1fr;
     gap: 12px;
   }
-  
+
   .edit-actions {
     flex-direction: column;
   }
-  
+
   .profile-edit-btn,
   .profile-save-btn,
   .profile-cancel-btn,
   .profile-logout-btn {
-    padding: 16px 20px;
+    padding: 14px 16px; 
   }
-  
+
   .profile-tabs {
     flex-direction: column;
     gap: 4px;
   }
-  
+
   .tab-button {
-    padding: 16px;
+    padding: 12px; 
   }
 }

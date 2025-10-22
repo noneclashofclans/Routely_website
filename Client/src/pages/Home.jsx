@@ -289,11 +289,13 @@ const HomePage = () => {
     return () => document.removeEventListener('touchstart', handleClickOutside);
   }, []);
 
+
   return (
     <div className="home-container">
       <header className="header">
         <Link to="/" className="logo-container"><Logo /></Link>
-        <div className="user-profile" onClick={() => navigate('/profile')}>
+        <div className="user-profile" onClick={() => navigate('/profile')}
+        style={window.innerWidth <= 768 ? { marginLeft: 0, order: 2 } : {}}>
           <UserIcon />
         </div>
       </header>

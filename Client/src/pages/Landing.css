@@ -5,7 +5,7 @@
   --shadow-color: rgba(0, 0, 0, 0.1);
 }
 
-/* ---------- GLOBAL ---------- */
+
 .pageContainer {
   font-family: "Arial", sans-serif;
   color: #333;
@@ -13,7 +13,6 @@
   background-color: var(--white-color);
 }
 
-/* ---------- HEADER ---------- */
 .header {
   height: 60px;
   display: flex;
@@ -53,7 +52,7 @@
   border-radius: 5px;
 }
 
-/* ---------- HERO ---------- */
+
 .hero {
   display: flex;
   justify-content: center;
@@ -155,7 +154,6 @@
   box-shadow: 0 8px 25px var(--shadow-color);
 }
 
-/* ---------- ROAD ANIMATION ---------- */
 .animation-section {
   padding: 60px 0;
   background-color: var(--light-gray-color);
@@ -210,7 +208,7 @@
   }
 }
 
-/* ---------- FOOTER ---------- */
+
 .footer {
   text-align: center;
   padding: 20px;
@@ -218,7 +216,6 @@
   color: #fff;
 }
 
-/* ---------- BUTTON HOVER ---------- */
 .ctaButton, .signUpButton {
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
@@ -229,7 +226,6 @@
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* ---------- NAV UNDERLINE ---------- */
 .navLink:not(.signUpButton) {
   position: relative;
   padding: 5px 0;

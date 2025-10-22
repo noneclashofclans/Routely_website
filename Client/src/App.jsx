@@ -5,6 +5,7 @@ import Landing from './pages/Landing.jsx';
 import Login from './pages/Login.jsx';
 import Home from './pages/Home.jsx';
 import Profile from './pages/Profile.jsx';
+import Layout from './components/Layout.jsx';
 import './App.css';
 
 function App() {
@@ -14,8 +15,16 @@ function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/profile" element={<Profile />} />
+        
+        <Route path="/home" element={
+            <Home />
+        } />
+        
+        <Route path="/profile" element={
+          <Layout>
+            <Profile />
+          </Layout>
+        } />
       </Routes>
     </main>
   );
