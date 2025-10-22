@@ -28,7 +28,7 @@ const Logo = () => <img src={logo3} alt="Routely Logo" className="logo3" />;
 
 const VehicleOptions = ({ results }) => {
   const vehicleTypes = [
-    { name: 'Bike', icon: '🏍️', rate: 8 },
+    { name: 'Bike',  icon: '🏍️', rate: 8 },
     { name: 'Auto', icon: '🛺', rate: 10 },
     { name: 'Mini', icon: '🚗', rate: 12 },
     { name: 'Sedan', icon: '🚙', rate: 15 },
@@ -38,7 +38,7 @@ const VehicleOptions = ({ results }) => {
   const calculatePrice = (rate) => {
     const distanceInKm = results.distance / 1000;
     return `₹ ${Math.round(distanceInKm * rate)}`;
-    };
+  };
 
   return (
     <div className="results-container">
@@ -75,6 +75,7 @@ const HomePage = () => {
   const [sidebarPosition, setSidebarPosition] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [mapsLoaded, setMapsLoaded] = useState(false);
+  const [resultsshown, setresultsshown] = useState(false);
   const startY = useRef(0);
 
   useEffect(() => {
@@ -128,6 +129,7 @@ const HomePage = () => {
       setDropoffCoords(null);
     }
     setSearchResults(null);
+    setresultsshown(false); // Reset results shown when input changes
 
     if (debounceTimeout.current) {
       clearTimeout(debounceTimeout.current);
@@ -173,11 +175,12 @@ const HomePage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!pickupCoords || !dropoffCoords) {
-      alert("Please select a valid location from the suggestions.");
+      alert("Please select a valid location from the suggestions, or try entering pickup/drop points again");
       return;
     }
     setLoading(true);
     setSearchResults(null);
+    setresultsshown(false); // Reset to false when new search starts
     
     try {
       const routeResponse = await fetch(`https://api.openrouteservice.org/v2/directions/driving-car/geojson`, {
@@ -228,6 +231,7 @@ const HomePage = () => {
       }
 
       setSearchResults({ distance });
+      setresultsshown(true); 
     } catch (error) {
       console.error("Failed to find route:", error);
       alert("Could not find a route.");
@@ -245,7 +249,6 @@ const HomePage = () => {
     setDropoffCoords(tempCoords);
   };
 
-  
   const handleTouchStart = (e) => {
     setIsDragging(true);
     startY.current = e.touches[0].clientY - sidebarPosition;
@@ -257,7 +260,6 @@ const HomePage = () => {
     const clientY = e.touches[0].clientY;
     const newPosition = clientY - startY.current;
 
-    
     const maxDragUp = -(sidebarRef.current.offsetHeight*0);
     const maxDragDown = (sidebarRef.current.offsetHeight*0.90);
 
@@ -289,7 +291,6 @@ const HomePage = () => {
     return () => document.removeEventListener('touchstart', handleClickOutside);
   }, []);
 
-
   return (
     <div className="home-container">
       <header className="header">
@@ -316,7 +317,7 @@ const HomePage = () => {
           />
 
           <div className="sidebar-content">
-             <h2 className='infos'>{window.innerWidth < 900 ? "Enter points" : "Plan Your Ride"}</h2>
+            <h2 className='infos'>{window.innerWidth <= 900 ? "Enter points" : "Plan Your Ride"}</h2>
             <form className="ride-form" onSubmit={handleSubmit}>
               <div className="input-group">
                 <span className="input-icon"><LocationPinIcon /></span>
@@ -363,12 +364,31 @@ const HomePage = () => {
                   </ul>
                 )}
               </div>
-              <button type="submit" className="submit-button" disabled={loading}>
-                {loading ? 'Searching...' : 'Find Rides'}
-              </button>
+              
+              {!resultsshown && (
+                <button type="submit" className="submit-button" disabled={loading}>
+                  {loading ? 'Searching...' : 'Find Rides'}
+                </button>
+              )}
             </form>
 
             {searchResults && <VehicleOptions results={searchResults} />}
+            
+            {resultsshown && (
+              <button 
+                type="button" 
+                className="submit-button" 
+                onClick={() => {
+                  setresultsshown(false);
+                  setSearchResults(null);
+                  setPickupCoords(null);
+                  setDropoffCoords(null);
+                }}
+                style={{ marginTop: '20px' }}
+              >
+                Edit location 
+              </button>
+            )}
           </div>
         </aside>
         <section className="map-placeholder">
