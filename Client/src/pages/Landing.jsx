@@ -10,19 +10,17 @@ const Landing = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    const user = localStorage.getItem("user");
+    const user = localStorage.getItem("User");
     
     setIsLoggedIn(!!token);
     
     if (user) {
       try {
         const userData = JSON.parse(user);
-        // Try all possible fields where email might be stored
         const email = userData.email || userData.userEmail || userData.username || userData.name || "";
         setUserEmail(email);
       } catch (error) {
         console.error("Error parsing user data:", error);
-        // If it's a string, use it directly
         if (typeof user === 'string') {
           setUserEmail(user);
         }
