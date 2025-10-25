@@ -6,25 +6,32 @@ import logo3 from '../assets/logo3.png';
 const Landing = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userEmail, setUserEmail] = useState("");
+  const [userName, setUserName] = useState(""); 
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    const user = localStorage.getItem("User");
+    const user = localStorage.getItem("user");
     
     setIsLoggedIn(!!token);
     
     if (user) {
       try {
         const userData = JSON.parse(user);
-        const email = userData.email || userData.userEmail || userData.username || userData.name || "";
-        setUserEmail(email);
+        console.log("User data from localStorage:", userData);
+        
+        
+        const name = userData.name || userData.username || "User";
+        setUserName(name);
+        
+        console.log("Extracted name:", name);
       } catch (error) {
         console.error("Error parsing user data:", error);
         if (typeof user === 'string') {
-          setUserEmail(user);
+          setUserName(user);
         }
       }
+    } else {
+      console.log("No user data found in localStorage");
     }
   }, []);
 
@@ -32,13 +39,17 @@ const Landing = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setIsLoggedIn(false);
-    setUserEmail("");
+    setUserName("");
     navigate("/");
   };
 
   const getDisplayName = () => {
-    if (userEmail) {
-      return userEmail.includes('@') ? userEmail.split('@')[0] : userEmail;
+    if (userName) {
+      // Return the first name only if it contains a space
+      if (userName.includes(' ')) {
+        return userName.split(' ')[0];
+      }
+      return userName;
     }
     return "User";
   };
