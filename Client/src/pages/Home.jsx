@@ -246,7 +246,7 @@ const HomePage = () => {
 
  const fetchIntelligentPricing = async (startAddress, endAddress) => {
   try {
-    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const backendUrl = import.meta.env.VITE_API_URL || 'https://routely-website-backend.onrender.com';
    
 
     const response = await fetch(`${backendUrl}/api/pricing/estimates`, {

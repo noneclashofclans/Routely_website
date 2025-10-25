@@ -46,7 +46,7 @@ const Register = () => {
                 password: formData.password,
             };
 
-            await axios.post('http://localhost:5000/api/users/register', userData);
+            await axios.post('https://routely-website-backend.onrender.com/api/users/register', userData);
 
             setLoading(false);
             setSuccess('Successfully registered! Redirecting to login...');
