@@ -54,12 +54,7 @@ const Landing = () => {
     // console.log("User logged out (simulated)"); // Removed simulation log
   };
 
-  const getDisplayName = () => {
-    if (userEmail) {
-      return userEmail.includes('@') ? userEmail.split('@')[0] : userEmail;
-    }
-    return "User";
-  };
+  // display userEmail directly in header
 
   // Placeholder logo URL
   const logoUrl = "https://placehold.co/150x50/4A90E2/FFFFFF?text=Routely&font=sans";
@@ -78,7 +73,7 @@ const Landing = () => {
         <nav className="flex items-center space-x-4">
           {isLoggedIn ? (
             <div className="flex items-center space-x-3">
-              <span className="text-gray-700 hidden sm:inline">Hello, {getDisplayName()}</span>
+              <span className="text-gray-700">{userEmail}</span>
               {/* --- FIX: Changed <a> to <button> for click handler --- */}
               <button
                 onClick={handleLogout}
