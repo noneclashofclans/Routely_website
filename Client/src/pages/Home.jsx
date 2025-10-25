@@ -17,40 +17,102 @@ const SwapIcon = () => (
   </svg>
 );
 
-const UserIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-    <circle cx="12" cy="7" r="4"></circle>
-  </svg>
-);
-
 const Logo = () => <img src={logo3} alt="Routely Logo" className="logo3" />;
 
-const VehicleOptions = ({ results }) => {
+const VehicleOptions = ({ results, pricingData }) => {
   const vehicleTypes = [
-    { name: 'Bike',  icon: '🏍️', rate: 8 },
-    { name: 'Auto', icon: '🛺', rate: 10 },
-    { name: 'Mini', icon: '🚗', rate: 12 },
-    { name: 'Sedan', icon: '🚙', rate: 15 },
-    { name: 'SUV', icon: '🚐', rate: 18 },
+    { name: 'Bike', icon: '🏍️', type: 'bike' },
+    { name: 'Auto', icon: '🛺', type: 'auto' },
+    { name: 'Mini', icon: '🚗', type: 'mini' },
+    { name: 'Sedan', icon: '🚙', type: 'sedan' },
+    { name: 'SUV', icon: '🚐', type: 'suv' },
   ];
 
-  const calculatePrice = (rate) => {
-    const distanceInKm = results.distance / 1000;
-    return `₹ ${Math.round(distanceInKm * rate)}`;
+  const getBestPrice = (vehicleType) => {
+    if (!pricingData || !pricingData.estimates) return 'Calculating...';
+    
+    // Get the lowest price among all services for this vehicle type
+    const prices = [];
+    
+    if (pricingData.estimates.uber && pricingData.estimates.uber[vehicleType]) {
+      prices.push(pricingData.estimates.uber[vehicleType].price);
+    }
+    if (pricingData.estimates.ola && pricingData.estimates.ola[vehicleType]) {
+      prices.push(pricingData.estimates.ola[vehicleType].price);
+    }
+    if (pricingData.estimates.rapido && pricingData.estimates.rapido[vehicleType]) {
+      prices.push(pricingData.estimates.rapido[vehicleType].price);
+    }
+    
+    if (prices.length === 0) return 'N/A';
+    
+    const bestPrice = Math.min(...prices);
+    return `₹ ${bestPrice}`;
+  };
+
+  const getServicePrices = (vehicleType) => {
+    if (!pricingData || !pricingData.estimates) return [];
+    
+    const services = [];
+    if (pricingData.estimates.uber && pricingData.estimates.uber[vehicleType]) {
+      services.push({
+        name: 'Uber',
+        price: pricingData.estimates.uber[vehicleType].price,
+        surge: pricingData.estimates.uber[vehicleType].surge
+      });
+    }
+    if (pricingData.estimates.ola && pricingData.estimates.ola[vehicleType]) {
+      services.push({
+        name: 'Ola',
+        price: pricingData.estimates.ola[vehicleType].price,
+        surge: pricingData.estimates.ola[vehicleType].surge
+      });
+    }
+    if (pricingData.estimates.rapido && pricingData.estimates.rapido[vehicleType]) {
+      services.push({
+        name: 'Rapido',
+        price: pricingData.estimates.rapido[vehicleType].price,
+        surge: pricingData.estimates.rapido[vehicleType].surge
+      });
+    }
+    
+    return services.sort((a, b) => a.price - b.price);
   };
 
   return (
     <div className="results-container">
-      <h4>Ride Options ({results.distance > 1000 ? `${(results.distance / 1000).toFixed(1)} km` : `${results.distance} m`})</h4>
+      <h4>Best Ride Options ({results.distance > 1000 ? `${(results.distance / 1000).toFixed(1)} km` : `${results.distance} m`})</h4>
+      {pricingData.timing && (
+        <div className="timing-info">
+          <small>{pricingData.timing.description} • {pricingData.timing.day}</small>
+        </div>
+      )}
       <ul className="vehicle-list">
-        {vehicleTypes.map(vehicle => (
-          <li key={vehicle.name} className="vehicle-item">
-            <span className="vehicle-icon">{vehicle.icon}</span>
-            <span className="vehicle-name">{vehicle.name}</span>
-            <span className="vehicle-price">{calculatePrice(vehicle.rate)}</span>
-          </li>
-        ))}
+        {vehicleTypes.map(vehicle => {
+          const servicePrices = getServicePrices(vehicle.type);
+          const bestPrice = getBestPrice(vehicle.type);
+          
+          return (
+            <li key={vehicle.name} className="vehicle-item">
+              <span className="vehicle-icon">{vehicle.icon}</span>
+              <span className="vehicle-name">{vehicle.name}</span>
+              <span className="vehicle-price">{bestPrice}</span>
+              
+              {/* Service breakdown */}
+              <div className="service-breakdown">
+                {servicePrices.map(service => (
+                  <div key={service.name} className="service-price">
+                    <span className="service-name">{service.name}</span>
+                    <span className="service-amount">₹{service.price}</span>
+                    {service.surge > 1.1 && (
+                      <span className="surge-badge">{service.surge}x</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
@@ -67,11 +129,14 @@ const HomePage = () => {
   const [dropoff, setDropoff] = useState('');
   const [pickupCoords, setPickupCoords] = useState(null);
   const [dropoffCoords, setDropoffCoords] = useState(null);
+  const [pickupAddress, setPickupAddress] = useState('');
+  const [dropoffAddress, setDropoffAddress] = useState('');
   const [pickupSuggestions, setPickupSuggestions] = useState([]);
   const [dropoffSuggestions, setDropoffSuggestions] = useState([]);
   const [activeInput, setActiveInput] = useState(null);
   const [loading, setLoading] = useState(false);
   const [searchResults, setSearchResults] = useState(null);
+  const [pricingData, setPricingData] = useState(null);
   const [sidebarPosition, setSidebarPosition] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [mapsLoaded, setMapsLoaded] = useState(false);
@@ -118,26 +183,66 @@ const HomePage = () => {
     };
   }, []);
 
+ const fetchIntelligentPricing = async (startAddress, endAddress) => {
+  try {
+    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+   
+
+    const response = await fetch(`${backendUrl}/api/pricing/estimates`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        startAddress,
+        endAddress
+      })
+    });
+
+    
+    if (!response.ok) {
+      throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+    }
+
+    const pricing = await response.json();
+    return pricing;
+  } catch (error) {
+   
+    if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+      console.log('Network issue detected');
+      throw new Error('Cannot connect to pricing service. Please check if backend server is running.');
+    }
+    
+    throw error;
+  }
+};
+
   const handleInputChange = async (e, field) => {
     const value = e.target.value;
     
     if (field === 'pickup') {
       setPickup(value);
       setPickupCoords(null);
+      setPickupAddress('');
     } else {
       setDropoff(value);
       setDropoffCoords(null);
+      setDropoffAddress('');
     }
     setSearchResults(null);
-    setresultsshown(false); // Reset results shown when input changes
+    setresultsshown(false); 
+    setPricingData(null);
 
     if (debounceTimeout.current) {
       clearTimeout(debounceTimeout.current);
     }
 
     if (value.length < 3) {
-      setPickupSuggestions([]);
-      setDropoffSuggestions([]);
+      if (field === 'pickup') {
+        setPickupSuggestions([]);
+      } else {
+        setDropoffSuggestions([]);
+      }
       return;
     }
 
@@ -146,9 +251,9 @@ const HomePage = () => {
         const response = await fetch(`https://api.openrouteservice.org/geocode/autocomplete?api_key=${import.meta.env.VITE_ORS_API_KEY}&text=${value}&focus.point.lon=85.8245&focus.point.lat=20.2961`);
         const data = await response.json();
         if (field === 'pickup') {
-          setPickupSuggestions(data.features);
+          setPickupSuggestions(data.features || []);
         } else {
-          setDropoffSuggestions(data.features);
+          setDropoffSuggestions(data.features || []);
         }
       } catch (error) {
         console.error('Autocomplete fetch failed:', error);
@@ -159,14 +264,17 @@ const HomePage = () => {
   const handleSuggestionClick = (field, feature) => {
     const [lon, lat] = feature.geometry.coordinates;
     const addressLabel = feature.properties.label;
+    const addressName = feature.properties.name;
 
     if (field === 'pickup') {
       setPickup(addressLabel);
       setPickupCoords([lon, lat]);
+      setPickupAddress(addressName);
       setPickupSuggestions([]);
     } else {
       setDropoff(addressLabel);
       setDropoffCoords([lon, lat]);
+      setDropoffAddress(addressName);
       setDropoffSuggestions([]);
     }
     setActiveInput(null);
@@ -174,23 +282,41 @@ const HomePage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!pickupCoords || !dropoffCoords) {
-      alert("Please select a valid location from the suggestions, or try entering pickup/drop points again");
+    if (!pickupCoords || !dropoffCoords || !pickupAddress || !dropoffAddress) {
+      alert("Please select a valid location from the suggestions");
       return;
     }
     setLoading(true);
     setSearchResults(null);
-    setresultsshown(false); // Reset to false when new search starts
+    setresultsshown(false);
+    setPricingData(null);
     
     try {
+      // First get route info
       const routeResponse = await fetch(`https://api.openrouteservice.org/v2/directions/driving-car/geojson`, {
         method: 'POST',
-        headers: { 'Authorization': import.meta.env.VITE_ORS_API_KEY, 'Content-Type': 'application/json' },
+        headers: { 
+          'Authorization': import.meta.env.VITE_ORS_API_KEY, 
+          'Content-Type': 'application/json' 
+        },
         body: JSON.stringify({ coordinates: [pickupCoords, dropoffCoords] })
       });
+      
+      if (!routeResponse.ok) {
+        throw new Error('Failed to get route information');
+      }
+      
       const routeData = await routeResponse.json();
       const distance = routeData.features[0].properties.summary.distance;
 
+      // Then get intelligent pricing from backend
+      const pricingResult = await fetchIntelligentPricing(pickupAddress, dropoffAddress);
+      
+      if (!pricingResult.success) {
+        throw new Error(pricingResult.error || 'Failed to get pricing');
+      }
+
+      // Update map with route
       if (map.current && mapsLoaded && window.google && window.google.maps) {
         const directionsService = new window.google.maps.DirectionsService();
         const directionsRenderer = new window.google.maps.DirectionsRenderer();
@@ -206,6 +332,7 @@ const HomePage = () => {
           }
         });
 
+        // Add markers
         new window.google.maps.Marker({
           position: { lat: pickupCoords[1], lng: pickupCoords[0] },
           map: map.current,
@@ -224,6 +351,7 @@ const HomePage = () => {
           }
         });
 
+        // Fit map to bounds
         const bounds = new window.google.maps.LatLngBounds();
         bounds.extend({ lat: pickupCoords[1], lng: pickupCoords[0] });
         bounds.extend({ lat: dropoffCoords[1], lng: dropoffCoords[0] });
@@ -231,10 +359,11 @@ const HomePage = () => {
       }
 
       setSearchResults({ distance });
+      setPricingData(pricingResult);
       setresultsshown(true); 
     } catch (error) {
-      console.error("Failed to find route:", error);
-      alert("Could not find a route.");
+      console.error("Failed to find route or pricing:", error);
+      alert(error.message || "Could not find a route or calculate pricing.");
     } finally {
       setLoading(false);
     }
@@ -243,10 +372,15 @@ const HomePage = () => {
   const handleSwap = () => {
     const tempPickup = pickup;
     const tempCoords = pickupCoords;
+    const tempAddress = pickupAddress;
+    
     setPickup(dropoff);
     setPickupCoords(dropoffCoords);
+    setPickupAddress(dropoffAddress);
+    
     setDropoff(tempPickup);
     setDropoffCoords(tempCoords);
+    setDropoffAddress(tempAddress);
   };
 
   const handleTouchStart = (e) => {
@@ -260,8 +394,8 @@ const HomePage = () => {
     const clientY = e.touches[0].clientY;
     const newPosition = clientY - startY.current;
 
-    const maxDragUp = -(sidebarRef.current.offsetHeight*0);
-    const maxDragDown = (sidebarRef.current.offsetHeight*0.90);
+    const maxDragUp = -(sidebarRef.current.offsetHeight * 0);
+    const maxDragDown = (sidebarRef.current.offsetHeight * 0.90);
 
     const clampedPosition = Math.min(maxDragDown, Math.max(maxDragUp, newPosition));
     setSidebarPosition(clampedPosition);
@@ -297,7 +431,6 @@ const HomePage = () => {
         <Link to="/" className="logo-container"><Logo /></Link>
         <div className="user-profile" onClick={() => navigate('/profile')}
         style={window.innerWidth <= 768 ? { marginLeft: 0, order: 2 } : {}}>
-          <UserIcon />
         </div>
       </header>
       <main className="main-content">
@@ -372,7 +505,9 @@ const HomePage = () => {
               )}
             </form>
 
-            {searchResults && <VehicleOptions results={searchResults} />}
+            {searchResults && pricingData && (
+              <VehicleOptions results={searchResults} pricingData={pricingData} />
+            )}
             
             {resultsshown && (
               <button 
@@ -381,8 +516,11 @@ const HomePage = () => {
                 onClick={() => {
                   setresultsshown(false);
                   setSearchResults(null);
+                  setPricingData(null);
                   setPickupCoords(null);
                   setDropoffCoords(null);
+                  setPickupAddress('');
+                  setDropoffAddress('');
                 }}
                 style={{ marginTop: '20px' }}
               >

@@ -1,4 +1,3 @@
-// user authentication
 const express = require('express')
 const router = express.Router();
 const User = require ('../models/userModel');
@@ -14,7 +13,7 @@ router.post('/register', async(req, res) => {
             return res.status(400).json({message: 'Pls fill all the fields'});
         }
 
-        const userExists = await user.findOne({email});
+        const userExists = await User.findOne({email});
         if (userExists){
             return res.status(400).json({message: 'User with the given mail address has already registered'})
         }
@@ -22,7 +21,7 @@ router.post('/register', async(req, res) => {
         const salting = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salting);
 
-        const newUser = await user.create({
+        const newUser = await User.create({
             name,
             email,
             password: hashedPassword,
@@ -38,20 +37,20 @@ router.post('/register', async(req, res) => {
     }
 });
 
-
 router.post('/login', async(req, res) => {
     try{
-
         const { email, password } = req.body;
 
         const user = await User.findOne({email});
 
-        if (!user) return res.status(500).json({message: 'Invalid valuess'});
+        if (!user) {
+            return res.status(401).json({message: 'Invalid email or password'});
+        }
 
         const hasMatched = await bcrypt.compare(password, user.password);
 
         if (!hasMatched){
-            return res.json({message: "False values"});
+            return res.status(401).json({message: "Invalid email or password"});
         }
 
         const payload = { userEmail: user.email };
@@ -70,6 +69,6 @@ router.post('/login', async(req, res) => {
         console.log(error.message);
         res.status(500).json({message: "Error during login"});
     }
-})
+});
 
 module.exports = router;

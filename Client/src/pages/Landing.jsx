@@ -1,35 +1,37 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Landing.css";
 import logo3 from '../assets/logo3.png';
 
-const UserIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="28"
-    height="28"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-    <circle cx="12" cy="7" r="4"></circle>
-  </svg>
-);
-
 const Landing = () => {
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const user = localStorage.getItem("user");
+    
+    setIsLoggedIn(!!token);
+    if (user) {
+      try {
+        const userData = JSON.parse(user);
+        setUserEmail(userData.email || "");
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+        setUserEmail("User");
+      }
+    }
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setIsLoggedIn(false);
+    setUserEmail("");
     navigate("/");
   };
-
+  
   return (
     <div className="pageContainer">
       <header className="header">
@@ -41,8 +43,11 @@ const Landing = () => {
         />
         <nav>
           {isLoggedIn ? (
-            <div className="user-profile" onClick={handleLogout}>
-              <UserIcon />
+            <div className="user-nav">
+              <span className="user-name">Hello, {userEmail}</span>
+              <button className="logout-btn" onClick={handleLogout}>
+                Logout
+              </button>
             </div>
           ) : (
             <>
@@ -65,8 +70,8 @@ const Landing = () => {
             Stop switching between apps. Compare fares from Uber, Ola, and
             Rapido in one place and choose the smartest way to travel.
           </p>
-          <Link className="ctaButton" to="/register">
-            Get Started for Free
+          <Link className="ctaButton" to={isLoggedIn ? "/home" : "/register"}>
+            {isLoggedIn ? "Go to Dashboard" : "Get Started for Free"}
           </Link>
         </div>
       </section>
@@ -148,7 +153,7 @@ const Landing = () => {
             <path
               d="M104.5 38.5C108.5 38.5 111 36 111 32V25.5C111 21.5 108.5 19 104.5 19H86.5L78 10H31L22.5 19H14C10 19 7.5 21.5 7.5 25.5V32C7.5 36 10 38.5 14 38.5H104.5Z"
               fill="#d0021b"
-              stroke="#2c3e50"home
+              stroke="#2c3e50"
               strokeWidth="2"
             />
             <circle

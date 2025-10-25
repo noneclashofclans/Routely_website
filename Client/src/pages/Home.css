@@ -310,7 +310,7 @@ body {
         display: flex;
         justify-content: center;
         cursor: grab;
-        touch-action: none; /* Also disable on handle */
+        touch-action: none; 
         flex-shrink: 0;
     }
 

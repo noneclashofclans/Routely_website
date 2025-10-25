@@ -14,6 +14,8 @@ connectDB()
 
 const userRoutes = require('./routes/userRoutes');
 app.use('/api/users', userRoutes);
+const pricingRoutes = require('./routes/pricing'); 
+app.use('/api/pricing', pricingRoutes);
 
 
 app.get('/', (req, res) => {

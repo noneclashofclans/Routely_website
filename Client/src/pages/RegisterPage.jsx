@@ -16,7 +16,7 @@ const Register = () => {
     });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
-    const [loading, setLoading] = useState('');
+    const [loading, setLoading] = useState(false); 
 
     const handleChange = (e) => {
         setformData({ ...formData, [e.target.name]: e.target.value });
@@ -27,47 +27,44 @@ const Register = () => {
         setError('');
         setSuccess('');
 
-        
-        if (formData.password != formData.confirmPassword) {
+        if (formData.password !== formData.confirmPassword) {
             setError('Passwords do not match. Please check the password you have typed.');
             return;
         }
 
         if (formData.password.length < 6) {
-            setError('Password must be of at least 6 digits')
-            return
+            setError('Password must be at least 6 characters long.');
+            return;
         }
-        // else it loads
+
         setLoading(true);
 
         try {
-
             const userData = {
                 name: `${formData.firstName} ${formData.lastName}`.trim(),
                 email: formData.email,
                 password: formData.password,
             };
 
-            const response = await axios.post('http://localhost:5000/api/users/register', userData);
+            await axios.post('http://localhost:5000/api/users/register', userData);
 
-            setSuccess(response.data.message);
             setLoading(false);
-
-
+            setSuccess('Successfully registered! Redirecting to login...');
+            
+           
             setTimeout(() => {
                 navigate('/login');
             }, 2000);
 
         } catch (err) {
             setLoading(false);
-            // Handle errors from the backend
             setError(err.response?.data?.message || 'Registration failed. Please try again.');
         }
     };
 
     return (
         <>
-         <img src={logo3} alt="Routely Logo" className="logo1" onClick={() => navigate('/')}/>
+            <img src={logo3} alt="Routely Logo" className="logo1" onClick={() => navigate('/')} />
             <div className="register-container">
                 <form className="register-form" onSubmit={handleSubmit}>
                     <h2>Create Your Account</h2>
@@ -117,8 +114,7 @@ const Register = () => {
                 </form>
             </div>
         </>
-
     );
 };
 
-export default Register
+export default Register;
