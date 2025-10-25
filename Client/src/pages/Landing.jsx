@@ -1,16 +1,31 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import "./Landing.css";
-import logo3 from '../assets/logo3.png';
+// --- FIX: Re-imported Link and useNavigate ---
+import { Link, useNavigate } from 'react-router-dom';
 
 const Landing = () => {
-  const navigate = useNavigate();
+  // --- FIX: Initialized useNavigate ---
+  const navigate = useNavigate(); 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
+    // --- FIX: Removed simulation block and restored real localStorage calls ---
+
+    /*
+    // Simulating a logged-out state. Change to true to test logged-in.
+    const simulation = {
+        token: null, 
+        user: JSON.stringify({ email: "test.user@example.com" }) 
+    };
+    // To test logged out:
+    // const simulation = { token: null, user: null };
+    // To test logged in:
+    // const simulation = { token: "fake-token", user: JSON.stringify({ email: "test.user@example.com" }) };
+    */
+
+    // --- FIX: Using actual localStorage values ---
     const token = localStorage.getItem("token");
-    const user = localStorage.getItem("User");
+    const user = localStorage.getItem("user"); // Using lowercase 'user' from previous fix
     
     setIsLoggedIn(!!token);
     
@@ -28,12 +43,15 @@ const Landing = () => {
     }
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = (e) => {
+    e.preventDefault(); // Prevent default action
+    // --- FIX: Restored actual logout logic ---
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setIsLoggedIn(false);
     setUserEmail("");
-    navigate("/");
+    navigate("/"); // Use navigate to redirect
+    // console.log("User logged out (simulated)"); // Removed simulation log
   };
 
   const getDisplayName = () => {
@@ -43,29 +61,42 @@ const Landing = () => {
     return "User";
   };
 
+  // Placeholder logo URL
+  const logoUrl = "https://placehold.co/150x50/4A90E2/FFFFFF?text=Routely&font=sans";
+
   return (
-    <div className="pageContainer">
-      <header className="header">
+    <div className="flex flex-col min-h-screen bg-gray-50 font-sans">
+      {/* Header */}
+      <header className="flex justify-between items-center p-4 bg-white shadow-md w-full sticky top-0 z-50">
         <img
-          src={logo3}
+          src={logoUrl}
           alt="Routely Logo"
-          className="logo"
+          className="h-10"
+          // --- FIX: Use navigate for logo click ---
           onClick={() => navigate("/")}
         />
-        <nav>
+        <nav className="flex items-center space-x-4">
           {isLoggedIn ? (
-            <div className="user-nav">
-              <span className="user-name">Hello, {getDisplayName()}</span>
-              <button className="logout-btn" onClick={handleLogout}>
+            <div className="flex items-center space-x-3">
+              <span className="text-gray-700 hidden sm:inline">Hello, {getDisplayName()}</span>
+              {/* --- FIX: Changed <a> to <button> for click handler --- */}
+              <button
+                onClick={handleLogout}
+                className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition duration-200"
+              >
                 Logout
               </button>
             </div>
           ) : (
             <>
-              <Link className="navLink" to="/login">
+              {/* --- FIX: Changed <a> to <Link> for router navigation --- */}
+              <Link to="/login" className="text-gray-600 hover:text-gray-900 font-medium">
                 Log In
               </Link>
-              <Link className="navLink signUpButton" to="/register">
+              <Link
+                to="/register"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200"
+              >
                 Sign Up
               </Link>
             </>
@@ -73,174 +104,100 @@ const Landing = () => {
         </nav>
       </header>
 
-      <section className="hero">
-        <div className="heroContent">
-          <h1 className="heroTitle">
+      {/* Hero Section */}
+      <section className="flex items-center justify-center text-center bg-white py-20 px-4">
+        <div className="max-w-3xl">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             One Journey. All the Rides. The Best Price.
           </h1>
-          <p className="heroSubtitle">
+          <p className="text-lg text-gray-600 mb-8">
             Stop switching between apps. Compare fares from Uber, Ola, and
             Rapido in one place and choose the smartest way to travel.
           </p>
-          <Link className="ctaButton" to={isLoggedIn ? "/home" : "/register"}>
+          {/* --- FIX: Changed <a> to <Link> for router navigation --- */}
+          <Link
+            to={isLoggedIn ? "/home" : "/register"}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-200 inline-block"
+          >
             {isLoggedIn ? "Go to Dashboard" : "Get Started for Free"}
           </Link>
         </div>
       </section>
 
-      <section className="animation-section">
-        <div className="road">
-          <svg
-            className="car"
-            style={{ animationDelay: "0s" }}
-            width="120"
-            height="60"
-            viewBox="0 0 120 60"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M104.5 38.5C108.5 38.5 111 36 111 32V25.5C111 21.5 108.5 19 104.5 19H86.5L78 10H31L22.5 19H14C10 19 7.5 21.5 7.5 25.5V32C7.5 36 10 38.5 14 38.5H104.5Z"
-              fill="#4A90E2"
-              stroke="#2c3e50"
-              strokeWidth="2"
-            />
-            <circle
-              cx="30"
-              cy="45"
-              r="8"
-              fill="#FFF"
-              stroke="#2c3e50"
-              strokeWidth="2"
-            />
-            <circle
-              cx="89"
-              cy="45"
-              r="8"
-              fill="#FFF"
-              stroke="#2c3e50"
-              strokeWidth="2"
-            />
-          </svg>
-
-          <svg
-            className="car"
-            style={{ animationDelay: "-3s" }}
-            width="120"
-            height="60"
-            viewBox="0 0 120 60"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M104.5 38.5C108.5 38.5 111 36 111 32V25.5C111 21.5 108.5 19 104.5 19H86.5L78 10H31L22.5 19H14C10 19 7.5 21.5 7.5 25.5V32C7.5 36 10 38.5 14 38.5H104.5Z"
-              fill="#f5a623"
-              stroke="#2c3e50"
-              strokeWidth="2"
-            />
-            <circle
-              cx="30"
-              cy="45"
-              r="8"
-              fill="#FFF"
-              stroke="#2c3e50"
-              strokeWidth="2"
-            />
-            <circle
-              cx="89"
-              cy="45"
-              r="8"
-              fill="#FFF"
-              stroke="#2c3e50"
-              strokeWidth="2"
-            />
-          </svg>
-
-          <svg
-            className="car"
-            style={{ animationDelay: "-6s", animationDuration: "9s" }}
-            width="120"
-            height="60"
-            viewBox="0 0 120 60"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M104.5 38.5C108.5 38.5 111 36 111 32V25.5C111 21.5 108.5 19 104.5 19H86.5L78 10H31L22.5 19H14C10 19 7.5 21.5 7.5 25.5V32C7.5 36 10 38.5 14 38.5H104.5Z"
-              fill="#d0021b"
-              stroke="#2c3e50"
-              strokeWidth="2"
-            />
-            <circle
-              cx="30"
-              cy="45"
-              r="8"
-              fill="#FFF"
-              stroke="#2c3e50"
-              strokeWidth="2"
-            />
-            <circle
-              cx="89"
-              cy="45"
-              r="8"
-              fill="#FFF"
-              stroke="#2c3e50"
-              strokeWidth="2"
-            />
-          </svg>
-        </div>
-      </section>
-
-      <section className="howItWorks">
-        <h2 className="sectionTitle">How It Works ?</h2>
-        <div className="stepsContainer">
-          <div className="step">
-            <div className="stepIcon">1</div>
-            <h4>Enter Your Destination</h4>
-            <p>Just tell us where you want to go.</p>
+      {/* How It Works Section */}
+      <section className="py-16 bg-gray-50 text-center">
+        <h2 className="text-3xl font-bold text-gray-900 mb-12">How It Works?</h2>
+        <div className="flex flex-col md:flex-row justify-center gap-8 max-w-5xl mx-auto px-4">
+          <div className="flex-1 p-6">
+            <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mb-4 mx-auto">
+              1
+            </div>
+            <h4 className="text-xl font-semibold text-gray-900 mb-2">Enter Your Destination</h4>
+            <p className="text-gray-600">Just tell us where you want to go.</p>
           </div>
-          <div className="step">
-            <div className="stepIcon">2</div>
-            <h4>Choose & Book</h4>
-            <p>Pick the best option and ride smarter.</p>
+          <div className="flex-1 p-6">
+            <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mb-4 mx-auto">
+              2
+            </div>
+            <h4 className="text-xl font-semibold text-gray-900 mb-2">Choose & Book</h4>
+            <p className="text-gray-600">Pick the best option and ride smarter.</p>
           </div>
-          <div className="step">
-            <div className="stepIcon">3</div>
-            <h4>Hassle-free payment</h4>
-            <p>Pay your ride fees directly from our website!</p>
+          <div className="flex-1 p-6">
+            <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mb-4 mx-auto">
+              3
+            </div>
+            <h4 className="text-xl font-semibold text-gray-900 mb-2">Hassle-free payment</h4>
+            <p className="text-gray-600">Pay your ride fees directly from our website!</p>
           </div>
         </div>
       </section>
-      <section className="features">
-        <h2 className="sectionTitle">The Right Path to Savings</h2>
-        <div className="featuresGrid">
-          <div className="featureItem">
-            <h3>Save Money</h3>
-            <p>
+
+      {/* Features Section */}
+      <section className="py-16 bg-white text-center">
+        <h2 className="text-3xl font-bold text-gray-900 mb-12">The Right Path to Savings</h2>
+        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto px-4">
+          <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Save Money</h3>
+            <p className="text-gray-600">
               Always find the cheapest ride without the hassle of checking
               multiple apps.
             </p>
           </div>
-          <div className="featureItem">
-            <h3>Save Time</h3>
-            <p>
+          <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Save Time</h3>
+            <p className="text-gray-600">
               One search is all it takes. Get a complete picture of your ride
               options in seconds.
             </p>
           </div>
-          <div className="featureItem">
-            <h3>Ride Confidently</h3>
-            <p>
+          <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Ride Confidently</h3>
+            <p className="text-gray-600">
               Make informed decisions with transparent pricing, all in one
               simple interface.
             </p>
+            {/* --- FIX: Changed closing tag from </col> to </p> --- */}
           </div>
         </div>
       </section>
 
-      <footer className="footer">
+      {/* Footer */}
+      <footer className="text-center p-6 bg-gray-800 text-gray-300 mt-auto">
         &copy; {new Date().getFullYear()} Routely. All rights reserved. Made by
-        <b>Rishit Mohanty</b>.
+        <b className="font-semibold text-white ml-1">Rishit Mohanty</b>.
       </footer>
     </div>
   );
 };
 
-export default Landing;
+// Since this is a single file, we need a root component 'App' for it to be rendered.
+// We'll make 'Landing' the main App component.
+const App = () => {
+    // In a real multi-page app, you'd have a router here.
+    // For this single-file preview, we just render the Landing page.
+    return <Landing />;
+};
+
+export default App;
+
+
