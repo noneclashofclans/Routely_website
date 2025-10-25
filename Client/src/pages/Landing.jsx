@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import './Landing.css';
 // --- FIX: Re-imported Link and useNavigate ---
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -60,20 +61,20 @@ const Landing = () => {
   const logoUrl = "https://placehold.co/150x50/4A90E2/FFFFFF?text=Routely&font=sans";
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50 font-sans">
+  <div className="pageContainer flex flex-col min-h-screen bg-gray-50 font-sans">
       {/* Header */}
-      <header className="flex justify-between items-center p-4 bg-white shadow-md w-full sticky top-0 z-50">
+  <header className="header flex justify-between items-center p-4 bg-white shadow-md w-full sticky top-0 z-50">
         <img
           src={logoUrl}
           alt="Routely Logo"
-          className="h-10"
+          className="logo h-10"
           // --- FIX: Use navigate for logo click ---
           onClick={() => navigate("/")}
         />
         <nav className="flex items-center space-x-4">
           {isLoggedIn ? (
             <div className="flex items-center space-x-3">
-              <span className="text-gray-700">{userEmail}</span>
+              <span className="text-gray-700 nav-email">{userEmail}</span>
               {/* --- FIX: Changed <a> to <button> for click handler --- */}
               <button
                 onClick={handleLogout}
@@ -85,12 +86,12 @@ const Landing = () => {
           ) : (
             <>
               {/* --- FIX: Changed <a> to <Link> for router navigation --- */}
-              <Link to="/login" className="text-gray-600 hover:text-gray-900 font-medium">
+              <Link to="/login" className="navLink text-gray-600 hover:text-gray-900 font-medium">
                 Log In
               </Link>
               <Link
                 to="/register"
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200"
+                className="navLink signUpButton bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200"
               >
                 Sign Up
               </Link>
@@ -100,12 +101,12 @@ const Landing = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="flex items-center justify-center text-center bg-white py-20 px-4">
-        <div className="max-w-3xl">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+      <section className="hero flex items-center justify-center text-center bg-white py-20 px-4">
+        <div className="heroContent max-w-3xl">
+          <h1 className="heroTitle text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             One Journey. All the Rides. The Best Price.
           </h1>
-          <p className="text-lg text-gray-600 mb-8">
+          <p className="heroSubtitle text-lg text-gray-600 mb-8">
             Stop switching between apps. Compare fares from Uber, Ola, and
             Rapido in one place and choose the smartest way to travel.
           {/* --- FIX: Corrected closing tag --- */}
@@ -113,7 +114,7 @@ const Landing = () => {
           {/* --- FIX: Changed <a> to <Link> for router navigation --- */}
           <Link
             to={isLoggedIn ? "/home" : "/register"}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-200 inline-block"
+            className="ctaButton bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-200 inline-block"
           >
             {isLoggedIn ? "Go to Dashboard" : "Get Started for Free"}
           </Link>
