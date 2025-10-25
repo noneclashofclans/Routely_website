@@ -13,13 +13,19 @@ const Landing = () => {
     const user = localStorage.getItem("user");
     
     setIsLoggedIn(!!token);
+    
     if (user) {
       try {
         const userData = JSON.parse(user);
-        setUserEmail(userData.email || "");
+        // Try all possible fields where email might be stored
+        const email = userData.email || userData.userEmail || userData.username || userData.name || "";
+        setUserEmail(email);
       } catch (error) {
         console.error("Error parsing user data:", error);
-        setUserEmail("User");
+        // If it's a string, use it directly
+        if (typeof user === 'string') {
+          setUserEmail(user);
+        }
       }
     }
   }, []);
@@ -31,7 +37,14 @@ const Landing = () => {
     setUserEmail("");
     navigate("/");
   };
-  
+
+  const getDisplayName = () => {
+    if (userEmail) {
+      return userEmail.includes('@') ? userEmail.split('@')[0] : userEmail;
+    }
+    return "User";
+  };
+
   return (
     <div className="pageContainer">
       <header className="header">
@@ -44,7 +57,7 @@ const Landing = () => {
         <nav>
           {isLoggedIn ? (
             <div className="user-nav">
-              <span className="user-name">Hello, {userEmail}</span>
+              <span className="user-name">Hello, {getDisplayName()}</span>
               <button className="logout-btn" onClick={handleLogout}>
                 Logout
               </button>
@@ -61,6 +74,7 @@ const Landing = () => {
           )}
         </nav>
       </header>
+
       <section className="hero">
         <div className="heroContent">
           <h1 className="heroTitle">
@@ -192,7 +206,7 @@ const Landing = () => {
           <div className="step">
             <div className="stepIcon">3</div>
             <h4>Hassle-free payment</h4>
-            <p>Pay your ride fees directly from our website! (Coming soon!)</p>
+            <p>Pay your ride fees directly from our website!</p>
           </div>
         </div>
       </section>
@@ -224,13 +238,8 @@ const Landing = () => {
       </section>
 
       <footer className="footer">
-        &copy; {new Date().getFullYear()} Routely. All rights reserved. 
-        <br />
-        Made by
+        &copy; {new Date().getFullYear()} Routely. All rights reserved. Made by
         <b>Rishit Mohanty</b>.
-        <br />
-        <br />
-        <em>[Optimised for <b>Tier-2</b> cities]</em>
       </footer>
     </div>
   );
