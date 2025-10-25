@@ -41,8 +41,8 @@
 
 .user-name {
   font-weight: bold;
-  color: #ffffff;
-  margin: 0;
+  color: blue;
+  margin: 0 20px ;
   white-space: nowrap;
 }
 
@@ -321,6 +321,11 @@
   .featuresGrid {
     gap: 20px;
   }
+   .user-name {
+    font-size: 14px;
+    color: blue;
+    margin: 0 20px ;
+  }
 }
 
 @media (min-width: 300px) {
@@ -382,6 +387,12 @@
     padding: 12px 24px;
     font-size: 16px;
   }
+
+   .user-name {
+    font-size: 14px;
+    color: blue;
+    margin: 0 20px ;
+  }
 }
 
 @media (max-width: 480px) {
@@ -438,6 +449,8 @@
 
   .user-name {
     font-size: 14px;
+    color: blue;
+    margin: 0 20px ;
   }
 
   .logout-btn {
@@ -462,5 +475,7 @@
 
   .user-name {
     font-size: 13px;
+    color: blue;
+    margin: 0 20px ;
   }
 }
