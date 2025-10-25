@@ -19,7 +19,11 @@ const SwapIcon = () => (
 
 const Logo = () => <img src={logo3} alt="Routely Logo" className="logo3" />;
 
+
 const VehicleOptions = ({ results, pricingData }) => {
+
+  const [expandedVehicle, setExpandedVehicle] = useState(null);
+
   const vehicleTypes = [
     { name: 'Bike', icon: '🏍️', type: 'bike' },
     { name: 'Auto', icon: '🛺', type: 'auto' },
@@ -28,12 +32,19 @@ const VehicleOptions = ({ results, pricingData }) => {
     { name: 'SUV', icon: '🚐', type: 'suv' },
   ];
 
+  
+  const handleToggle = (vehicleType) => {
+    if (expandedVehicle === vehicleType) {
+      setExpandedVehicle(null); 
+    } else {
+      setExpandedVehicle(vehicleType); 
+    }
+  };
+
   const getBestPrice = (vehicleType) => {
     if (!pricingData || !pricingData.estimates) return 'Calculating...';
     
-    // Get the lowest price among all services for this vehicle type
     const prices = [];
-    
     if (pricingData.estimates.uber && pricingData.estimates.uber[vehicleType]) {
       prices.push(pricingData.estimates.uber[vehicleType].price);
     }
@@ -75,13 +86,51 @@ const VehicleOptions = ({ results, pricingData }) => {
         surge: pricingData.estimates.rapido[vehicleType].surge
       });
     }
-    
+   
     return services.sort((a, b) => a.price - b.price);
   };
 
+ 
+  const getEstimatedTravelTime = (distance, timingDescription) => {
+    const distanceInKm = distance / 1000;
+    let averageSpeedKmH = 35;
+
+    if (timingDescription && timingDescription.includes('Peak')) {
+      averageSpeedKmH = 20;
+    } else if (timingDescription && timingDescription.includes('Night')) {
+      averageSpeedKmH = 45; 
+    }
+
+    if (distanceInKm === 0 || averageSpeedKmH === 0) {
+      return "";
+    }
+
+    const timeInHours = distanceInKm / averageSpeedKmH;
+    const timeInMinutes = Math.round(timeInHours * 60);
+
+    if (timeInMinutes < 1) {
+      return "1 min";
+    }
+    
+    return `${timeInMinutes} mins`;
+  };
+
+ 
+  const distanceText = results.distance > 1000 
+    ? `${(results.distance / 1000).toFixed(1)} km` 
+    : `${results.distance} m`;
+
+  const timeText = getEstimatedTravelTime(results.distance, pricingData.timing?.description);
+
   return (
     <div className="results-container">
-      <h4>Best Ride Options ({results.distance > 1000 ? `${(results.distance / 1000).toFixed(1)} km` : `${results.distance} m`})</h4>
+      
+      <h4>
+        Ride Distance: {distanceText}
+        <br />
+        Estimated Time: <em>{timeText}</em>
+      </h4>
+      
       {pricingData.timing && (
         <div className="timing-info">
           <small>{pricingData.timing.description} • {pricingData.timing.day}</small>
@@ -91,25 +140,36 @@ const VehicleOptions = ({ results, pricingData }) => {
         {vehicleTypes.map(vehicle => {
           const servicePrices = getServicePrices(vehicle.type);
           const bestPrice = getBestPrice(vehicle.type);
-          
+          const isExpanded = expandedVehicle === vehicle.type;
+
           return (
-            <li key={vehicle.name} className="vehicle-item">
+            <li 
+              key={vehicle.name} 
+              className="vehicle-item" 
+              onClick={() => handleToggle(vehicle.type)}
+              style={{ cursor: 'pointer' }} 
+            >
               <span className="vehicle-icon">{vehicle.icon}</span>
               <span className="vehicle-name">{vehicle.name}</span>
               <span className="vehicle-price">{bestPrice}</span>
               
-              {/* Service breakdown */}
-              <div className="service-breakdown">
-                {servicePrices.map(service => (
-                  <div key={service.name} className="service-price">
-                    <span className="service-name">{service.name}</span>
-                    <span className="service-amount">₹{service.price}</span>
-                    {service.surge > 1.1 && (
-                      <span className="surge-badge">{service.surge}x</span>
-                    )}
-                  </div>
-                ))}
-              </div>
+              {isExpanded && (
+                <div className="service-breakdown">
+                  {servicePrices.map(service => (
+                    <div key={service.name} className="service-price">
+                      <span className="service-name">
+                        {service.name}
+                      </span>
+                      <span className="service-amount">
+                        {service.surge > 1.1 && (
+                          <span className="surge-badge">{service.surge}x</span>
+                        )}
+                        ₹{service.price}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </li>
           );
         })}
@@ -117,6 +177,7 @@ const VehicleOptions = ({ results, pricingData }) => {
     </div>
   );
 };
+
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -292,7 +353,7 @@ const HomePage = () => {
     setPricingData(null);
     
     try {
-      // First get route info
+      
       const routeResponse = await fetch(`https://api.openrouteservice.org/v2/directions/driving-car/geojson`, {
         method: 'POST',
         headers: { 
@@ -309,14 +370,14 @@ const HomePage = () => {
       const routeData = await routeResponse.json();
       const distance = routeData.features[0].properties.summary.distance;
 
-      // Then get intelligent pricing from backend
+     
       const pricingResult = await fetchIntelligentPricing(pickupAddress, dropoffAddress);
       
       if (!pricingResult.success) {
         throw new Error(pricingResult.error || 'Failed to get pricing');
       }
 
-      // Update map with route
+      
       if (map.current && mapsLoaded && window.google && window.google.maps) {
         const directionsService = new window.google.maps.DirectionsService();
         const directionsRenderer = new window.google.maps.DirectionsRenderer();

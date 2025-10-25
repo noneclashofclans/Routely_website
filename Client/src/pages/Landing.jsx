@@ -192,7 +192,7 @@ const Landing = () => {
           <div className="step">
             <div className="stepIcon">3</div>
             <h4>Hassle-free payment</h4>
-            <p>Pay your ride fees directly from our website!</p>
+            <p>Pay your ride fees directly from our website! (Coming soon!)</p>
           </div>
         </div>
       </section>
@@ -224,8 +224,13 @@ const Landing = () => {
       </section>
 
       <footer className="footer">
-        &copy; {new Date().getFullYear()} Routely. All rights reserved. Made by
+        &copy; {new Date().getFullYear()} Routely. All rights reserved. 
+        <br />
+        Made by
         <b>Rishit Mohanty</b>.
+        <br />
+        <br />
+        <em>[Optimised for <b>Tier-2</b> cities]</em>
       </footer>
     </div>
   );

@@ -64,7 +64,7 @@ body {
 
 
 .sidebar {
-    width: 400px;
+    width: 540px;
     background-color: var(--white-color);
     padding: 30px;
     box-shadow: 4px 0 10px rgba(0,0,0,0.05);
@@ -360,4 +360,164 @@ body {
         margin: -8px 0;
         max-width: 160px;
     }
+}
+
+/* --- Add these styles to Home.css for the new VehicleOptions --- */
+
+.results-container h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.timing-info {
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 15px;
+}
+
+.vehicle-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vehicle-item {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden; /* Important for the expand animation */
+}
+
+.vehicle-item:hover {
+  background-color: #f1f3f5;
+}
+
+.vehicle-item.expanded {
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-color: #dee2e6;
+}
+
+.vehicle-summary {
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+}
+
+.vehicle-icon {
+  font-size: 1.5rem;
+  margin-right: 12px;
+}
+
+.vehicle-name {
+  font-weight: 600;
+  color: #212529;
+}
+
+.vehicle-price {
+  margin-left: auto;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #007bff;
+}
+
+.vehicle-toggle-icon {
+  margin-left: 10px;
+  font-size: 0.8rem;
+  color: #888;
+  transition: transform 0.2s ease;
+}
+
+.vehicle-item.expanded .vehicle-toggle-icon {
+  transform: rotate(180deg);
+}
+
+.service-breakdown {
+  padding: 0 15px 15px 15px;
+  border-top: 1px solid #e9ecef;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.service-price {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background-color: #fff;
+}
+
+.service-price.best-price {
+  background-color: #e6f7ff;
+  border: 1px solid #b3e0ff;
+}
+
+.service-details {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.service-name {
+  font-weight: 500;
+  color: #333;
+}
+
+.best-badge {
+  background-color: #28a745;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.price-details {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.service-amount {
+  font-weight: 600;
+  color: #111;
+}
+
+.service-price-none {
+  font-style: italic;
+  color: #888;
+  padding: 10px;
+  text-align: center;
+}
+
+.surge-badge {
+  background-color: #fff3cd;
+  color: #856404;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 6px;
+  border-radius: 4px;
+  border: 1px solid #ffeeba;
 }
