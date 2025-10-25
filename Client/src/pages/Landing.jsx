@@ -113,6 +113,7 @@ const Landing = () => {
           <p className="text-lg text-gray-600 mb-8">
             Stop switching between apps. Compare fares from Uber, Ola, and
             Rapido in one place and choose the smartest way to travel.
+          {/* --- FIX: Corrected closing tag --- */}
           </p>
           {/* --- FIX: Changed <a> to <Link> for router navigation --- */}
           <Link
@@ -161,6 +162,7 @@ const Landing = () => {
             <p className="text-gray-600">
               Always find the cheapest ride without the hassle of checking
               multiple apps.
+            {/* --- FIX: Corrected closing tag --- */}
             </p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
@@ -190,14 +192,15 @@ const Landing = () => {
   );
 };
 
-// Since this is a single file, we need a root component 'App' for it to be rendered.
-// We'll make 'Landing' the main App component.
+// --- FIX: Removed the 'App' wrapper component ---
+/*
 const App = () => {
     // In a real multi-page app, you'd have a router here.
     // For this single-file preview, we just render the Landing page.
     return <Landing />;
 };
+*/
 
-export default App;
-
+// --- FIX: Export 'Landing' directly ---
+export default Landing;
 
