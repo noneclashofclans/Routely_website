@@ -6,23 +6,23 @@ import logo3 from '../assets/logo3.png';
 const Landing = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState(""); 
+  const [userName, setUserName] = useState("");
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     const user = localStorage.getItem("user");
-    
+
     setIsLoggedIn(!!token);
-    
+
     if (user) {
       try {
         const userData = JSON.parse(user);
         console.log("User data from localStorage:", userData);
-        
-        
+
+
         const name = userData.name || userData.username || "User";
         setUserName(name);
-        
+
         console.log("Extracted name:", name);
       } catch (error) {
         console.error("Error parsing user data:", error);
@@ -204,18 +204,18 @@ const Landing = () => {
         <div className="stepsContainer">
           <div className="step">
             <div className="stepIcon">1</div>
-            <h4>Enter Your Destination</h4>
-            <p>Just tell us where you want to go.</p>
+            <h4>Enter Your Journey</h4>
+            <p>Tell us your pickup and drop locations to get started.</p>
           </div>
           <div className="step">
             <div className="stepIcon">2</div>
-            <h4>Choose & Book</h4>
-            <p>Pick the best option and ride smarter.</p>
+            <h4>Compare Prices Instantly</h4>
+            <p>See real-time fares from Uber, Ola, and Rapido side by side.</p>
           </div>
           <div className="step">
             <div className="stepIcon">3</div>
-            <h4>Hassle-free payment</h4>
-            <p>Pay your ride fees directly from our website!</p>
+            <h4>Choose & Ride</h4>
+            <p>Pick the best option and book directly through your preferred app.</p>
           </div>
         </div>
       </section>

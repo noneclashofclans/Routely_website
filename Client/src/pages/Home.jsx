@@ -32,18 +32,18 @@ const VehicleOptions = ({ results, pricingData }) => {
     { name: 'SUV', icon: '🚐', type: 'suv' },
   ];
 
-  
+
   const handleToggle = (vehicleType) => {
     if (expandedVehicle === vehicleType) {
-      setExpandedVehicle(null); 
+      setExpandedVehicle(null);
     } else {
-      setExpandedVehicle(vehicleType); 
+      setExpandedVehicle(vehicleType);
     }
   };
 
   const getBestPrice = (vehicleType) => {
     if (!pricingData || !pricingData.estimates) return 'Calculating...';
-    
+
     const prices = [];
     if (pricingData.estimates.uber && pricingData.estimates.uber[vehicleType]) {
       prices.push(pricingData.estimates.uber[vehicleType].price);
@@ -54,16 +54,16 @@ const VehicleOptions = ({ results, pricingData }) => {
     if (pricingData.estimates.rapido && pricingData.estimates.rapido[vehicleType]) {
       prices.push(pricingData.estimates.rapido[vehicleType].price);
     }
-    
+
     if (prices.length === 0) return 'N/A';
-    
+
     const bestPrice = Math.min(...prices);
     return `₹ ${bestPrice}`;
   };
 
   const getServicePrices = (vehicleType) => {
     if (!pricingData || !pricingData.estimates) return [];
-    
+
     const services = [];
     if (pricingData.estimates.uber && pricingData.estimates.uber[vehicleType]) {
       services.push({
@@ -86,54 +86,77 @@ const VehicleOptions = ({ results, pricingData }) => {
         surge: pricingData.estimates.rapido[vehicleType].surge
       });
     }
-   
+
     return services.sort((a, b) => a.price - b.price);
   };
 
- 
-  const getEstimatedTravelTime = (distance, timingDescription) => {
-    const distanceInKm = distance / 1000;
-    let averageSpeedKmH = 35;
 
-    if (timingDescription && timingDescription.includes('Peak')) {
-      averageSpeedKmH = 20;
-    } else if (timingDescription && timingDescription.includes('Night')) {
-      averageSpeedKmH = 45; 
-    }
-
-    if (distanceInKm === 0 || averageSpeedKmH === 0) {
-      return "";
-    }
-
-    const timeInHours = distanceInKm / averageSpeedKmH;
-    const timeInMinutes = Math.round(timeInHours * 60);
-
-    if (timeInMinutes < 1) {
-      return "1 min";
-    }
+  const getEstimatedTravelTime = (distanceMeters, timing) => {
     
-    return `${timeInMinutes} mins`;
+    if (!Number.isFinite(distanceMeters) || distanceMeters <= 0) return '';
+
+    const km = distanceMeters / 1000;
+
+    // Determine base speed (km/h) by distance bucket to reflect urban patterns
+    let baseSpeedKmh;
+    if (km <= 1) baseSpeedKmh = 12;       // very short trips — low avg due to stops/traffic
+    else if (km <= 5) baseSpeedKmh = 18;  // inner-city
+    else if (km <= 15) baseSpeedKmh = 30; // medium trips
+    else baseSpeedKmh = 45;               // longer trips on faster roads
+
+    // Apply time-of-day traffic multipliers
+    let trafficMultiplier = 1.0;
+    if (timing && typeof timing === 'object') {
+      if (timing.isPeak) trafficMultiplier *= 1.3; // peak slowdown
+      if (timing.period === 'late_night') trafficMultiplier *= 0.8; // faster at night
+      if (timing.period === 'lunch') trafficMultiplier *= 1.05;
+      if (timing.isWeekend) trafficMultiplier *= 1.05;
+    }
+
+    // Convert to minutes (safeguard minimum base speed 5 km/h)
+    const timeHours = km / Math.max(5, baseSpeedKmh / trafficMultiplier);
+    let minutes = Math.max(1, Math.round(timeHours * 60));
+
+    // Add a small buffer for pickups and routing uncertainty: max(10% of time, 2 minutes)
+    const buffer = Math.max(Math.round(minutes * 0.1), 2);
+    minutes = minutes + buffer;
+
+    // Nicely format
+    if (minutes < 60) return `${minutes} mins`;
+    const hrs = Math.floor(minutes / 60);
+    const rem = minutes % 60;
+    return rem === 0 ? `${hrs} hr${hrs > 1 ? 's' : ''}` : `${hrs} hr ${rem} mins`;
   };
 
- 
-  const distanceText = results.distance > 1000 
-    ? `${(results.distance / 1000).toFixed(1)} km` 
+
+  // Prefer a precise duration from results.duration (seconds) if available
+  const distanceText = results.distance > 1000
+    ? `${(results.distance / 1000).toFixed(1)} km`
     : `${results.distance} m`;
 
-  const timeText = getEstimatedTravelTime(results.distance, pricingData.timing?.description);
+  const formatDuration = (secs) => {
+    if (!Number.isFinite(secs) || secs <= 0) return '';
+    const minutes = Math.round(secs / 60);
+    if (minutes < 60) return `${minutes} mins`;
+    const hrs = Math.floor(minutes / 60);
+    const rem = minutes % 60;
+    return rem === 0 ? `${hrs} hr${hrs > 1 ? 's' : ''}` : `${hrs} hr ${rem} mins`;
+  };
+
+  const timeText = results.duration ? formatDuration(results.duration) : getEstimatedTravelTime(results.distance, pricingData.timing);
 
   return (
     <div className="results-container">
-      
+
       <h4>
         Ride Distance: {distanceText}
         <br />
         Estimated Time: <em>{timeText}</em>
       </h4>
-      
+
       {pricingData.timing && (
         <div className="timing-info">
-          <small>{pricingData.timing.description} • {pricingData.timing.day}</small>
+          <small>Today's day: {pricingData.timing.day}</small>
         </div>
       )}
       <ul className="vehicle-list">
@@ -143,16 +166,16 @@ const VehicleOptions = ({ results, pricingData }) => {
           const isExpanded = expandedVehicle === vehicle.type;
 
           return (
-            <li 
-              key={vehicle.name} 
-              className="vehicle-item" 
+            <li
+              key={vehicle.name}
+              className="vehicle-item"
               onClick={() => handleToggle(vehicle.type)}
-              style={{ cursor: 'pointer' }} 
+              style={{ cursor: 'pointer' }}
             >
               <span className="vehicle-icon">{vehicle.icon}</span>
               <span className="vehicle-name">{vehicle.name}</span>
               <span className="vehicle-price">{bestPrice}</span>
-              
+
               {isExpanded && (
                 <div className="service-breakdown">
                   {servicePrices.map(service => (
@@ -203,6 +226,8 @@ const HomePage = () => {
   const [mapsLoaded, setMapsLoaded] = useState(false);
   const [resultsshown, setresultsshown] = useState(false);
   const startY = useRef(0);
+  const startPos = useRef(0);
+  const maxPos = useRef(0);
 
   useEffect(() => {
     if (map.current || !mapContainer.current) return;
@@ -244,43 +269,54 @@ const HomePage = () => {
     };
   }, []);
 
- const fetchIntelligentPricing = async (startAddress, endAddress) => {
-  try {
-    const backendUrl = import.meta.env.VITE_API_URL || 'https://routely-website-backend.onrender.com';
-   
-
-    const response = await fetch(`${backendUrl}/api/pricing/estimates`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        startAddress,
-        endAddress
-      })
-    });
-
-    
-    if (!response.ok) {
-      throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+  // When results are shown on mobile, snap the sidebar open so user can see options
+  useEffect(() => {
+    if (resultsshown && window.innerWidth <= 900) {
+      setSidebarPosition(0);
     }
+  }, [resultsshown]);
 
-    const pricing = await response.json();
-    return pricing;
-  } catch (error) {
-   
-    if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-      console.log('Network issue detected');
-      throw new Error('Cannot connect to pricing service. Please check if backend server is running.');
+  const fetchIntelligentPricing = async (startAddress, endAddress) => {
+    try {
+      const backendUrl = import.meta.env.VITE_API_URL || 'https://routely-website-backend.onrender.com';
+
+
+      // send client's local hour/day so server computes timing in user's local timezone
+      const now = new Date();
+      const response = await fetch(`${backendUrl}/api/pricing/estimates`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          startAddress,
+          endAddress,
+          clientHour: now.getHours(),
+          clientDay: now.getDay()
+        })
+      });
+
+
+      if (!response.ok) {
+        throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+      }
+
+      const pricing = await response.json();
+      return pricing;
+    } catch (error) {
+
+      if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+        console.log('Network issue detected');
+        throw new Error('Cannot connect to pricing service. Please check if backend server is running.');
+      }
+
+      throw error;
     }
-    
-    throw error;
-  }
-};
+  };
 
   const handleInputChange = async (e, field) => {
     const value = e.target.value;
-    
+
     if (field === 'pickup') {
       setPickup(value);
       setPickupCoords(null);
@@ -291,7 +327,7 @@ const HomePage = () => {
       setDropoffAddress('');
     }
     setSearchResults(null);
-    setresultsshown(false); 
+    setresultsshown(false);
     setPricingData(null);
 
     if (debounceTimeout.current) {
@@ -309,12 +345,66 @@ const HomePage = () => {
 
     debounceTimeout.current = setTimeout(async () => {
       try {
-        const response = await fetch(`https://api.openrouteservice.org/geocode/autocomplete?api_key=${import.meta.env.VITE_ORS_API_KEY}&text=${value}&focus.point.lon=85.8245&focus.point.lat=20.2961`);
+        const response = await fetch(
+          `https://api.olamaps.io/places/v1/autocomplete?location=20.2961,85.8245&input=${encodeURIComponent(
+            value
+          )}&api_key=${import.meta.env.VITE_OLA_API_KEY}`
+        );
+
         const data = await response.json();
+        console.log('OLA API raw response:', data);
+      
+        let features = [];
+        if (Array.isArray(data.predictions)) {
+          features = data.predictions;
+        } else if (Array.isArray(data.features)) {
+          features = data.features;
+        } else if (Array.isArray(data.results)) {
+          features = data.results;
+        } else if (Array.isArray(data)) {
+          features = data;
+        }
+
+        
+        if (features.length > 0) {
+          const firstProps = features[0].properties || features[0];
+          console.log('First suggestion properties:', firstProps);
+        }
+       
+        const normalized = features.map((f, idx) => {
+          const props = f.properties || f;
+          const geom = f.geometry || {};
+          // Try to extract coordinates from multiple possible fields
+          let coords = null;
+          if (Array.isArray(geom.coordinates) && geom.coordinates.length >= 2) coords = geom.coordinates;
+          else if (Array.isArray(f.coordinates) && f.coordinates.length >= 2) coords = f.coordinates;
+          else if (Array.isArray(props.coordinates) && props.coordinates.length >= 2) coords = props.coordinates;
+          else if (Array.isArray(props.center) && props.center.length >= 2) coords = props.center;
+          else if (props.geometry && props.geometry.location && (props.geometry.location.lng || props.geometry.location.lon) && (props.geometry.location.lat || props.geometry.location.latitude)) {
+            coords = [props.geometry.location.lng ?? props.geometry.location.lon, props.geometry.location.lat ?? props.geometry.location.latitude];
+          } else if (props.location && (props.location.lng || props.location.lon) && (props.location.lat || props.location.latitude)) {
+            coords = [props.location.lng ?? props.location.lon, props.location.lat ?? props.location.latitude];
+          }
+          // Use Ola's structured_formatting for display
+          const mainText = props.structured_formatting?.main_text || props.name || props.label || props.display_name || props.text || '';
+          const secondaryText = props.structured_formatting?.secondary_text || '';
+          return {
+            id: props.id || props.place_id || props.reference || props.osm_id || idx,
+            properties: {
+              name: mainText,
+              label: secondaryText,
+              description: props.description || '',
+              county: props.county || props.region || props.admin || '',
+            },
+            geometry: { coordinates: coords },
+          };
+        });
+        console.log('Normalized suggestions:', normalized);
+
         if (field === 'pickup') {
-          setPickupSuggestions(data.features || []);
+          setPickupSuggestions(normalized);
         } else {
-          setDropoffSuggestions(data.features || []);
+          setDropoffSuggestions(normalized);
         }
       } catch (error) {
         console.error('Autocomplete fetch failed:', error);
@@ -323,10 +413,35 @@ const HomePage = () => {
   };
 
   const handleSuggestionClick = (field, feature) => {
-    const [lon, lat] = feature.geometry.coordinates;
-    const addressLabel = feature.properties.label;
-    const addressName = feature.properties.name;
-
+    // Defensive: extract coordinates robustly
+    let coords = feature?.geometry?.coordinates;
+    if (!Array.isArray(coords) || coords.length < 2) {
+      coords = null;
+    }
+    // If still not found, try other possible locations
+    if (!coords) {
+      const props = feature?.properties || {};
+      if (Array.isArray(feature?.coordinates) && feature.coordinates.length >= 2) coords = feature.coordinates;
+      else if (Array.isArray(props.coordinates) && props.coordinates.length >= 2) coords = props.coordinates;
+      else if (Array.isArray(props.center) && props.center.length >= 2) coords = props.center;
+      else if (props.location && (props.location.lng || props.location.lon) && (props.location.lat || props.location.latitude)) {
+        coords = [props.location.lng ?? props.location.lon, props.location.lat ?? props.location.latitude];
+      }
+    }
+    if (!coords) {
+      alert('No coordinates found for this suggestion.');
+      return;
+    }
+    let lon = parseFloat(coords[0]);
+    let lat = parseFloat(coords[1]);
+    // Heuristic: swap if not in India bbox
+    const inIndia = (lo, la) => (la >= 6 && la <= 37 && lo >= 68 && lo <= 97);
+    if (!inIndia(lon, lat) && inIndia(lat, lon)) {
+      [lon, lat] = [lat, lon];
+    }
+    // Use Ola's structured_formatting for address/label
+    const addressLabel = feature?.properties?.description || feature?.properties?.label || feature?.properties?.name || '';
+    const addressName = feature?.properties?.name || feature?.properties?.label || '';
     if (field === 'pickup') {
       setPickup(addressLabel);
       setPickupCoords([lon, lat]);
@@ -351,33 +466,35 @@ const HomePage = () => {
     setSearchResults(null);
     setresultsshown(false);
     setPricingData(null);
-    
+
     try {
-      
+
       const routeResponse = await fetch(`https://api.openrouteservice.org/v2/directions/driving-car/geojson`, {
         method: 'POST',
-        headers: { 
-          'Authorization': import.meta.env.VITE_ORS_API_KEY, 
-          'Content-Type': 'application/json' 
+        headers: {
+          'Authorization': import.meta.env.VITE_ORS_API_KEY,
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ coordinates: [pickupCoords, dropoffCoords] })
       });
-      
+
       if (!routeResponse.ok) {
         throw new Error('Failed to get route information');
       }
-      
-      const routeData = await routeResponse.json();
-      const distance = routeData.features[0].properties.summary.distance;
 
-     
+  const routeData = await routeResponse.json();
+  const summary = routeData.features[0].properties.summary || {};
+  const distance = summary.distance;
+  const duration = summary.duration; // duration in seconds
+
+
       const pricingResult = await fetchIntelligentPricing(pickupAddress, dropoffAddress);
-      
+
       if (!pricingResult.success) {
         throw new Error(pricingResult.error || 'Failed to get pricing');
       }
 
-      
+
       if (map.current && mapsLoaded && window.google && window.google.maps) {
         const directionsService = new window.google.maps.DirectionsService();
         const directionsRenderer = new window.google.maps.DirectionsRenderer();
@@ -419,9 +536,9 @@ const HomePage = () => {
         map.current.fitBounds(bounds);
       }
 
-      setSearchResults({ distance });
+  setSearchResults({ distance, duration });
       setPricingData(pricingResult);
-      setresultsshown(true); 
+      setresultsshown(true);
     } catch (error) {
       console.error("Failed to find route or pricing:", error);
       alert(error.message || "Could not find a route or calculate pricing.");
@@ -434,11 +551,11 @@ const HomePage = () => {
     const tempPickup = pickup;
     const tempCoords = pickupCoords;
     const tempAddress = pickupAddress;
-    
+
     setPickup(dropoff);
     setPickupCoords(dropoffCoords);
     setPickupAddress(dropoffAddress);
-    
+
     setDropoff(tempPickup);
     setDropoffCoords(tempCoords);
     setDropoffAddress(tempAddress);
@@ -446,29 +563,28 @@ const HomePage = () => {
 
   const handleTouchStart = (e) => {
     setIsDragging(true);
-    startY.current = e.touches[0].clientY - sidebarPosition;
+    startY.current = e.touches[0].clientY;
+    startPos.current = sidebarPosition;
   };
 
   const handleTouchMove = (e) => {
     if (!isDragging) return;
-
     const clientY = e.touches[0].clientY;
-    const newPosition = clientY - startY.current;
-
-    const maxDragUp = -(sidebarRef.current.offsetHeight * 0);
-    const maxDragDown = (sidebarRef.current.offsetHeight * 0.90);
-
-    const clampedPosition = Math.min(maxDragDown, Math.max(maxDragUp, newPosition));
-    setSidebarPosition(clampedPosition);
+    const delta = startY.current - clientY; // positive when dragging up
+    const desired = Math.round(startPos.current - delta);
+    const clamped = Math.max(0, Math.min(maxPos.current || 0, desired));
+    setSidebarPosition(clamped);
   };
 
   const handleTouchEnd = () => {
     setIsDragging(false);
+    const snapThreshold = (maxPos.current || 0) / 2;
+    setSidebarPosition(prev => (prev <= snapThreshold ? 0 : (maxPos.current || 0)));
+  };
 
-    const threshold = -(sidebarRef.current.offsetHeight * 0.35);
-    const snapOpen = -(sidebarRef.current.offsetHeight * 0.75);
-
-    setSidebarPosition(prev => (prev < threshold ? snapOpen : 0));
+  const handleHandleClick = () => {
+    // toggle open/closed on tap
+    setSidebarPosition(prev => (prev === 0 ? (maxPos.current || 0) : 0));
   };
 
   useEffect(() => {
@@ -486,12 +602,32 @@ const HomePage = () => {
     return () => document.removeEventListener('touchstart', handleClickOutside);
   }, []);
 
+  // Initialize sidebar collapsed position (peek) on mobile and update on resize
+  useEffect(() => {
+    const setInitialSidebar = () => {
+      const el = sidebarRef.current;
+      if (!el) return;
+      const height = el.offsetHeight || window.innerHeight * 0.65;
+      const peek = Math.min(140, Math.round(height * 0.35));
+      const max = Math.max(0, height - peek);
+      maxPos.current = max;
+      // Start collapsed (show only peek)
+      setSidebarPosition(max);
+    };
+
+    // Only initialize on small screens where sidebar is absolute
+    if (window.innerWidth <= 900) setInitialSidebar();
+    const onResize = () => { if (window.innerWidth <= 900) setInitialSidebar(); };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
   return (
     <div className="home-container">
       <header className="header">
         <Link to="/" className="logo-container"><Logo /></Link>
         <div className="user-profile" onClick={() => navigate('/profile')}
-        style={window.innerWidth <= 768 ? { marginLeft: 0, order: 2 } : {}}>
+          style={window.innerWidth <= 768 ? { marginLeft: 0, order: 2 } : {}}>
         </div>
       </header>
       <main className="main-content">
@@ -508,6 +644,7 @@ const HomePage = () => {
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
+            onClick={handleHandleClick}
           />
 
           <div className="sidebar-content">
@@ -527,9 +664,11 @@ const HomePage = () => {
                 {activeInput === 'pickup' && pickupSuggestions.length > 0 && (
                   <ul className="suggestions-list">
                     {pickupSuggestions.map(feature => (
-                      <li key={feature.properties.id} onClick={() => handleSuggestionClick('pickup', feature)}>
-                        {feature.properties.name}
-                        <span className="suggestion-label">{feature.properties.county}</span>
+                      <li key={feature.id} onClick={() => handleSuggestionClick('pickup', feature)}>
+                        <span>{feature.properties.name}</span>
+                        {feature.properties.label && (
+                          <span className="suggestion-label">{feature.properties.label}</span>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -550,18 +689,20 @@ const HomePage = () => {
                 {activeInput === 'dropoff' && dropoffSuggestions.length > 0 && (
                   <ul className="suggestions-list">
                     {dropoffSuggestions.map(feature => (
-                      <li key={feature.properties.id} onClick={() => handleSuggestionClick('dropoff', feature)}>
-                        {feature.properties.name}
-                        <span className="suggestion-label">{feature.properties.county}</span>
+                      <li key={feature.id} onClick={() => handleSuggestionClick('dropoff', feature)}>
+                        <span>{feature.properties.name}</span>
+                        {feature.properties.label && (
+                          <span className="suggestion-label">{feature.properties.label}</span>
+                        )}
                       </li>
                     ))}
                   </ul>
                 )}
               </div>
-              
+
               {!resultsshown && (
                 <button type="submit" className="submit-button" disabled={loading}>
-                  {loading ? 'Searching...' : 'Find Rides'}
+                  {loading ? 'Fetching...' : 'Compare ride prices'}
                 </button>
               )}
             </form>
@@ -569,11 +710,11 @@ const HomePage = () => {
             {searchResults && pricingData && (
               <VehicleOptions results={searchResults} pricingData={pricingData} />
             )}
-            
+
             {resultsshown && (
-              <button 
-                type="button" 
-                className="submit-button" 
+              <button
+                type="button"
+                className="submit-button"
                 onClick={() => {
                   setresultsshown(false);
                   setSearchResults(null);
@@ -585,7 +726,7 @@ const HomePage = () => {
                 }}
                 style={{ marginTop: '20px' }}
               >
-                Edit location 
+                Edit location
               </button>
             )}
           </div>

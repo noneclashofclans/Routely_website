@@ -4,7 +4,7 @@ import RegisterPage from './pages/RegisterPage.jsx';
 import Landing from './pages/Landing.jsx';
 import Login from './pages/Login.jsx';
 import Home from './pages/Home.jsx';
-import './App.css';
+
 
 function App() {
   return (
