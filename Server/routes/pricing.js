@@ -2,7 +2,7 @@ const express = require("express");
 const fetch = require("node-fetch"); 
 const router = express.Router();
 
-const PYTHON_ML_URL = process.env.PYTHON_ML_URL || "http://127.0.0.1:5000/predict_fares"; 
+const PYTHON_ML_URL = process.env.PYTHON_ML_URL || "https://routely-website-137.onrender.com/predict_fares"; 
 
 
 function normalizeTimePeriod(timeStr) {
