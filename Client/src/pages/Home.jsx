@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import React, { useState, useEffect, useRef } from 'react';
-=======
-import React, { useState, useEffect, useRef, useCallback } from 'react';
->>>>>>> b3616a3 (Latest changes made)
 import { Link, useNavigate } from 'react-router-dom';
 import './Home.css';
 import logo3 from '../assets/logo3.png';
@@ -23,40 +19,19 @@ const SwapIcon = () => (
 
 const Logo = () => <img src={logo3} alt="Routely Logo" className="logo3" />;
 
-<<<<<<< HEAD
 
 const VehicleOptions = ({ results, pricingData }) => {
 
-=======
-const VehicleOptions = ({ results, pricingData }) => {
->>>>>>> b3616a3 (Latest changes made)
   const [expandedVehicle, setExpandedVehicle] = useState(null);
 
   const vehicleTypes = [
     { name: 'Bike', icon: '🏍️', type: 'bike' },
     { name: 'Auto', icon: '🛺', type: 'auto' },
-<<<<<<< HEAD
     { name: 'Mini', icon: '🚗', type: 'mini' },
     { name: 'Sedan', icon: '🚙', type: 'sedan' },
     { name: 'SUV', icon: '🚐', type: 'suv' },
   ];
 
-=======
-    { name: 'Car', icon: '🚗', type: 'car' }, 
-  ];
-
-  const availableVehicleTypes = () => {
-    if (!pricingData || !pricingData.estimates) return [];
-    
-    const availableTypes = new Set();
-    for (const platformKey in pricingData.estimates) {
-      for (const vehicleKey in pricingData.estimates[platformKey]) {
-        availableTypes.add(vehicleKey);
-      }
-    }
-    return vehicleTypes.filter(v => availableTypes.has(v.type));
-  };
->>>>>>> b3616a3 (Latest changes made)
 
   const handleToggle = (vehicleType) => {
     if (expandedVehicle === vehicleType) {
@@ -70,7 +45,6 @@ const VehicleOptions = ({ results, pricingData }) => {
     if (!pricingData || !pricingData.estimates) return 'Calculating...';
 
     const prices = [];
-<<<<<<< HEAD
     if (pricingData.estimates.uber && pricingData.estimates.uber[vehicleType]) {
       prices.push(pricingData.estimates.uber[vehicleType].price);
     }
@@ -80,34 +54,17 @@ const VehicleOptions = ({ results, pricingData }) => {
     if (pricingData.estimates.rapido && pricingData.estimates.rapido[vehicleType]) {
       prices.push(pricingData.estimates.rapido[vehicleType].price);
     }
-=======
-    const platforms = ['uber', 'ola', 'rapido'];
-    
-    platforms.forEach(p => {
-      if (pricingData.estimates[p] && 
-        pricingData.estimates[p][vehicleType] && 
-        Number.isFinite(pricingData.estimates[p][vehicleType].price)
-      ) {
-        prices.push(pricingData.estimates[p][vehicleType].price);
-      }
-    });
->>>>>>> b3616a3 (Latest changes made)
 
     if (prices.length === 0) return 'N/A';
 
     const bestPrice = Math.min(...prices);
-<<<<<<< HEAD
     return `₹ ${bestPrice}`;
-=======
-    return `₹${bestPrice.toFixed(0)}`; // Changed to show rupees symbol and no decimals
->>>>>>> b3616a3 (Latest changes made)
   };
 
   const getServicePrices = (vehicleType) => {
     if (!pricingData || !pricingData.estimates) return [];
 
     const services = [];
-<<<<<<< HEAD
     if (pricingData.estimates.uber && pricingData.estimates.uber[vehicleType]) {
       services.push({
         name: 'Uber',
@@ -180,40 +137,11 @@ const VehicleOptions = ({ results, pricingData }) => {
   const formatDuration = (secs) => {
     if (!Number.isFinite(secs) || secs <= 0) return '';
     const minutes = Math.round(secs / 60);
-=======
-    const platforms = ['uber', 'ola', 'rapido'];
-
-    platforms.forEach(p => {
-      const platformData = pricingData.estimates[p];
-      if (platformData && platformData[vehicleType]) {
-        services.push({
-          name: p.charAt(0).toUpperCase() + p.slice(1), 
-          price: platformData[vehicleType].price,
-          surge: platformData[vehicleType].price > 100 ? 1.7 : 1.0 
-        });
-      }
-    });
-    
-    return services.sort((a, b) => a.price - b.price);
-  };
-
-  const formatDistance = (distanceMeters) => {
-    if (!Number.isFinite(distanceMeters) || distanceMeters <= 0) return 'N/A';
-    return distanceMeters > 1000
-      ? `${(distanceMeters / 1000).toFixed(1)} km`
-      : `${Math.round(distanceMeters)} m`;
-  };
-
-  const formatDuration = (secs) => {
-    if (!Number.isFinite(secs) || secs <= 0) return 'N/A';
-    const minutes = Math.max(1, Math.round(secs / 60)); 
->>>>>>> b3616a3 (Latest changes made)
     if (minutes < 60) return `${minutes} mins`;
     const hrs = Math.floor(minutes / 60);
     const rem = minutes % 60;
     return rem === 0 ? `${hrs} hr${hrs > 1 ? 's' : ''}` : `${hrs} hr ${rem} mins`;
   };
-<<<<<<< HEAD
 
   const timeText = results.duration ? formatDuration(results.duration) : getEstimatedTravelTime(results.distance, pricingData.timing);
 
@@ -269,112 +197,11 @@ const VehicleOptions = ({ results, pricingData }) => {
           );
         })}
       </ul>
-=======
-  
-  const distanceText = formatDistance(results.distance);
-  const timeText = formatDuration(results.duration);
-
-  return (
-    <div className="results-container">
-      <div className="ride-summary">
-        <div className="summary-item">
-          <span className="summary-label">Distance:</span>
-          <span className="summary-value">{distanceText}</span>
-        </div>
-        <div className="summary-item">
-          <span className="summary-label">Time:</span>
-          <span className="summary-value">{timeText}</span>
-        </div>
-        {pricingData.timing && (
-          <div className="summary-item">
-            <span className="summary-label">Time of Day:</span>
-            <span className="summary-value timing-period">{pricingData.timing.period}</span>
-          </div>
-        )}
-      </div>
-
-      <div className="vehicle-options">
-        {availableVehicleTypes().map(vehicle => { 
-          const servicePrices = getServicePrices(vehicle.type);
-          const bestPrice = getBestPrice(vehicle.type);
-          const isExpanded = expandedVehicle === vehicle.type;
-          
-          if (bestPrice === 'N/A' || servicePrices.length === 0) return null; 
-
-          return (
-            <div
-              key={vehicle.name}
-              className={`vehicle-card ${isExpanded ? 'expanded' : ''}`}
-              onClick={() => handleToggle(vehicle.type)}
-            >
-              <div className="vehicle-card-header">
-                <div className="vehicle-icon-name">
-                  <span className="vehicle-emoji">{vehicle.icon}</span>
-                  <span className="vehicle-title">{vehicle.name}</span>
-                </div>
-                <div className="best-price-container">
-                  <div className="best-price-badge">Best Price</div>
-                  <div className="best-price-amount">{bestPrice}</div>
-                </div>
-                <div className="expand-arrow">
-                  <svg 
-                    width="16" 
-                    height="16" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2"
-                    style={{ 
-                      transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                      transition: 'transform 0.3s ease'
-                    }}
-                  >
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                  </svg>
-                </div>
-              </div>
-
-              {isExpanded && (
-                <div className="vehicle-card-details">
-                  <div className="service-comparison">
-                    <div className="service-header">
-                      <span>Service</span>
-                      <span>Fare</span>
-                    </div>
-                    <div className="service-list">
-                      {servicePrices.map(service => (
-                        <div key={service.name} className="service-item">
-                          <div className="service-name-wrapper">
-                            <span className="service-provider">{service.name}</span>
-                            {service.surge > 1.0 && (
-                              <span className="surge-tag">Surge</span>
-                            )}
-                          </div>
-                          <div className="service-price-wrapper">
-                            {service.surge > 1.0 && (
-                              <span className="surge-multiplier">{service.surge.toFixed(1)}x</span>
-                            )}
-                            <span className="service-fare">₹{service.price.toFixed(0)}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
->>>>>>> b3616a3 (Latest changes made)
     </div>
   );
 };
 
-<<<<<<< HEAD
 
-=======
->>>>>>> b3616a3 (Latest changes made)
 const HomePage = () => {
   const navigate = useNavigate();
   const mapContainer = useRef(null);
@@ -429,11 +256,7 @@ const HomePage = () => {
       }
     } else {
       const script = document.createElement('script');
-<<<<<<< HEAD
       script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_KEY}&callback=${callbackName}`;
-=======
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_KEY}&callback=${callbackName}&libraries=places`;
->>>>>>> b3616a3 (Latest changes made)
       script.async = true;
       script.defer = true;
       document.head.appendChild(script);
@@ -446,17 +269,13 @@ const HomePage = () => {
     };
   }, []);
 
-<<<<<<< HEAD
   // When results are shown on mobile, snap the sidebar open so user can see options
-=======
->>>>>>> b3616a3 (Latest changes made)
   useEffect(() => {
     if (resultsshown && window.innerWidth <= 900) {
       setSidebarPosition(0);
     }
   }, [resultsshown]);
 
-<<<<<<< HEAD
   const fetchIntelligentPricing = async (startAddress, endAddress) => {
     try {
       const backendUrl = import.meta.env.VITE_API_URL || 'https://routely-website-backend.onrender.com';
@@ -464,12 +283,6 @@ const HomePage = () => {
 
       // send client's local hour/day so server computes timing in user's local timezone
       const now = new Date();
-=======
-  const fetchIntelligentPricing = async (startAddress, endAddress, distance_km, duration_min) => {
-    try {
-      const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001'; 
-
->>>>>>> b3616a3 (Latest changes made)
       const response = await fetch(`${backendUrl}/api/pricing/estimates`, {
         method: 'POST',
         headers: {
@@ -478,7 +291,6 @@ const HomePage = () => {
         body: JSON.stringify({
           startAddress,
           endAddress,
-<<<<<<< HEAD
           clientHour: now.getHours(),
           clientDay: now.getDay()
         })
@@ -487,35 +299,17 @@ const HomePage = () => {
 
       if (!response.ok) {
         throw new Error(`Server returned ${response.status}: ${response.statusText}`);
-=======
-          distance_km,
-          duration_min,
-          time_of_day: null 
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Server returned ${response.status}: ${response.statusText}`);
->>>>>>> b3616a3 (Latest changes made)
       }
 
       const pricing = await response.json();
       return pricing;
     } catch (error) {
-<<<<<<< HEAD
 
       if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
         console.log('Network issue detected');
         throw new Error('Cannot connect to pricing service. Please check if backend server is running.');
       }
 
-=======
-      if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-        console.log('Network issue detected');
-        throw new Error('Cannot connect to pricing service. Please check if backend server is running on port 3001.');
-      }
->>>>>>> b3616a3 (Latest changes made)
       throw error;
     }
   };
@@ -558,10 +352,7 @@ const HomePage = () => {
         );
 
         const data = await response.json();
-<<<<<<< HEAD
         console.log('OLA API raw response:', data);
-=======
->>>>>>> b3616a3 (Latest changes made)
       
         let features = [];
         if (Array.isArray(data.predictions)) {
@@ -574,7 +365,6 @@ const HomePage = () => {
           features = data;
         }
 
-<<<<<<< HEAD
         
         if (features.length > 0) {
           const firstProps = features[0].properties || features[0];
@@ -585,11 +375,6 @@ const HomePage = () => {
           const props = f.properties || f;
           const geom = f.geometry || {};
           // Try to extract coordinates from multiple possible fields
-=======
-        const normalized = features.map((f, idx) => {
-          const props = f.properties || f;
-          const geom = f.geometry || {};
->>>>>>> b3616a3 (Latest changes made)
           let coords = null;
           if (Array.isArray(geom.coordinates) && geom.coordinates.length >= 2) coords = geom.coordinates;
           else if (Array.isArray(f.coordinates) && f.coordinates.length >= 2) coords = f.coordinates;
@@ -600,10 +385,7 @@ const HomePage = () => {
           } else if (props.location && (props.location.lng || props.location.lon) && (props.location.lat || props.location.latitude)) {
             coords = [props.location.lng ?? props.location.lon, props.location.lat ?? props.location.latitude];
           }
-<<<<<<< HEAD
           // Use Ola's structured_formatting for display
-=======
->>>>>>> b3616a3 (Latest changes made)
           const mainText = props.structured_formatting?.main_text || props.name || props.label || props.display_name || props.text || '';
           const secondaryText = props.structured_formatting?.secondary_text || '';
           return {
@@ -617,10 +399,7 @@ const HomePage = () => {
             geometry: { coordinates: coords },
           };
         });
-<<<<<<< HEAD
         console.log('Normalized suggestions:', normalized);
-=======
->>>>>>> b3616a3 (Latest changes made)
 
         if (field === 'pickup') {
           setPickupSuggestions(normalized);
@@ -634,18 +413,12 @@ const HomePage = () => {
   };
 
   const handleSuggestionClick = (field, feature) => {
-<<<<<<< HEAD
     // Defensive: extract coordinates robustly
-=======
->>>>>>> b3616a3 (Latest changes made)
     let coords = feature?.geometry?.coordinates;
     if (!Array.isArray(coords) || coords.length < 2) {
       coords = null;
     }
-<<<<<<< HEAD
     // If still not found, try other possible locations
-=======
->>>>>>> b3616a3 (Latest changes made)
     if (!coords) {
       const props = feature?.properties || {};
       if (Array.isArray(feature?.coordinates) && feature.coordinates.length >= 2) coords = feature.coordinates;
@@ -661,24 +434,14 @@ const HomePage = () => {
     }
     let lon = parseFloat(coords[0]);
     let lat = parseFloat(coords[1]);
-<<<<<<< HEAD
     // Heuristic: swap if not in India bbox
-=======
->>>>>>> b3616a3 (Latest changes made)
     const inIndia = (lo, la) => (la >= 6 && la <= 37 && lo >= 68 && lo <= 97);
     if (!inIndia(lon, lat) && inIndia(lat, lon)) {
       [lon, lat] = [lat, lon];
     }
-<<<<<<< HEAD
     // Use Ola's structured_formatting for address/label
     const addressLabel = feature?.properties?.description || feature?.properties?.label || feature?.properties?.name || '';
     const addressName = feature?.properties?.name || feature?.properties?.label || '';
-=======
-    
-    const addressLabel = feature?.properties?.description || feature?.properties?.label || feature?.properties?.name || '';
-    const addressName = feature?.properties?.name || feature?.properties?.label || '';
-    
->>>>>>> b3616a3 (Latest changes made)
     if (field === 'pickup') {
       setPickup(addressLabel);
       setPickupCoords([lon, lat]);
@@ -705,10 +468,7 @@ const HomePage = () => {
     setPricingData(null);
 
     try {
-<<<<<<< HEAD
 
-=======
->>>>>>> b3616a3 (Latest changes made)
       const routeResponse = await fetch(`https://api.openrouteservice.org/v2/directions/driving-car/geojson`, {
         method: 'POST',
         headers: {
@@ -719,7 +479,6 @@ const HomePage = () => {
       });
 
       if (!routeResponse.ok) {
-<<<<<<< HEAD
         throw new Error('Failed to get route information');
       }
 
@@ -730,31 +489,12 @@ const HomePage = () => {
 
 
       const pricingResult = await fetchIntelligentPricing(pickupAddress, dropoffAddress);
-=======
-        throw new Error('Failed to get route information from ORS');
-      }
-
-      const routeData = await routeResponse.json();
-      const summary = routeData.features[0].properties.summary || {};
-      const distance = summary.distance;
-      const duration = summary.duration;
-
-      const pricingResult = await fetchIntelligentPricing(
-        pickupAddress,
-        dropoffAddress,
-        distance / 1000,
-        duration / 60
-      );
->>>>>>> b3616a3 (Latest changes made)
 
       if (!pricingResult.success) {
         throw new Error(pricingResult.error || 'Failed to get pricing');
       }
 
-<<<<<<< HEAD
 
-=======
->>>>>>> b3616a3 (Latest changes made)
       if (map.current && mapsLoaded && window.google && window.google.maps) {
         const directionsService = new window.google.maps.DirectionsService();
         const directionsRenderer = new window.google.maps.DirectionsRenderer();
@@ -770,10 +510,7 @@ const HomePage = () => {
           }
         });
 
-<<<<<<< HEAD
         // Add markers
-=======
->>>>>>> b3616a3 (Latest changes made)
         new window.google.maps.Marker({
           position: { lat: pickupCoords[1], lng: pickupCoords[0] },
           map: map.current,
@@ -792,21 +529,14 @@ const HomePage = () => {
           }
         });
 
-<<<<<<< HEAD
         // Fit map to bounds
-=======
->>>>>>> b3616a3 (Latest changes made)
         const bounds = new window.google.maps.LatLngBounds();
         bounds.extend({ lat: pickupCoords[1], lng: pickupCoords[0] });
         bounds.extend({ lat: dropoffCoords[1], lng: dropoffCoords[0] });
         map.current.fitBounds(bounds);
       }
 
-<<<<<<< HEAD
   setSearchResults({ distance, duration });
-=======
-      setSearchResults({ distance, duration }); 
->>>>>>> b3616a3 (Latest changes made)
       setPricingData(pricingResult);
       setresultsshown(true);
     } catch (error) {
@@ -840,11 +570,7 @@ const HomePage = () => {
   const handleTouchMove = (e) => {
     if (!isDragging) return;
     const clientY = e.touches[0].clientY;
-<<<<<<< HEAD
     const delta = startY.current - clientY; // positive when dragging up
-=======
-    const delta = startY.current - clientY;
->>>>>>> b3616a3 (Latest changes made)
     const desired = Math.round(startPos.current - delta);
     const clamped = Math.max(0, Math.min(maxPos.current || 0, desired));
     setSidebarPosition(clamped);
@@ -857,10 +583,7 @@ const HomePage = () => {
   };
 
   const handleHandleClick = () => {
-<<<<<<< HEAD
     // toggle open/closed on tap
-=======
->>>>>>> b3616a3 (Latest changes made)
     setSidebarPosition(prev => (prev === 0 ? (maxPos.current || 0) : 0));
   };
 
@@ -879,10 +602,7 @@ const HomePage = () => {
     return () => document.removeEventListener('touchstart', handleClickOutside);
   }, []);
 
-<<<<<<< HEAD
   // Initialize sidebar collapsed position (peek) on mobile and update on resize
-=======
->>>>>>> b3616a3 (Latest changes made)
   useEffect(() => {
     const setInitialSidebar = () => {
       const el = sidebarRef.current;
@@ -891,17 +611,11 @@ const HomePage = () => {
       const peek = Math.min(140, Math.round(height * 0.35));
       const max = Math.max(0, height - peek);
       maxPos.current = max;
-<<<<<<< HEAD
       // Start collapsed (show only peek)
       setSidebarPosition(max);
     };
 
     // Only initialize on small screens where sidebar is absolute
-=======
-      setSidebarPosition(max);
-    };
-
->>>>>>> b3616a3 (Latest changes made)
     if (window.innerWidth <= 900) setInitialSidebar();
     const onResize = () => { if (window.innerWidth <= 900) setInitialSidebar(); };
     window.addEventListener('resize', onResize);
@@ -1000,11 +714,7 @@ const HomePage = () => {
             {resultsshown && (
               <button
                 type="button"
-<<<<<<< HEAD
                 className="submit-button"
-=======
-                className="edit-location-button"
->>>>>>> b3616a3 (Latest changes made)
                 onClick={() => {
                   setresultsshown(false);
                   setSearchResults(null);
@@ -1014,10 +724,7 @@ const HomePage = () => {
                   setPickupAddress('');
                   setDropoffAddress('');
                 }}
-<<<<<<< HEAD
                 style={{ marginTop: '20px' }}
-=======
->>>>>>> b3616a3 (Latest changes made)
               >
                 Edit location
               </button>
