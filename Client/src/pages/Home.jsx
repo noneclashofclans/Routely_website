@@ -28,8 +28,6 @@ const VehicleOptions = ({ results, pricingData }) => {
     { name: 'Bike', icon: '🏍️', type: 'bike' },
     { name: 'Auto', icon: '🛺', type: 'auto' },
     { name: 'Mini', icon: '🚗', type: 'mini' },
-    { name: 'Sedan', icon: '🚙', type: 'sedan' },
-    { name: 'SUV', icon: '🚐', type: 'suv' },
   ];
 
 
@@ -602,7 +600,6 @@ const HomePage = () => {
     return () => document.removeEventListener('touchstart', handleClickOutside);
   }, []);
 
-  // Initialize sidebar collapsed position (peek) on mobile and update on resize
   useEffect(() => {
     const setInitialSidebar = () => {
       const el = sidebarRef.current;
