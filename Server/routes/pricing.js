@@ -35,7 +35,6 @@ router.post("/estimates", async (req, res) => {
       time_of_day: timePeriod
     };
 
-    // 2. Make a single fetch call to the Python API
     const response = await fetch(PYTHON_ML_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -51,10 +50,8 @@ router.post("/estimates", async (req, res) => {
 
     const pythonData = await response.json();
     
-    // The Python API returns results in pythonData.results
     const results = pythonData.results || []; 
 
-    // 3. Build shaped estimates object from the consolidated results
     const estimates = {};
     
     for (const r of results) {
