@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import './Home.css';
 import logo3 from '../assets/logo3.png';
 
+// --- Icons & Logo ---
 const LocationPinIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
@@ -19,7 +20,7 @@ const SwapIcon = () => (
 
 const Logo = () => <img src={logo3} alt="Routely Logo" className="logo3" />;
 
-// UPDATED: Simply displays the predictions from your ML Model
+// --- UPDATED VehicleOptions Component (Visual Fixes Applied) ---
 const VehicleOptions = ({ results, pricingData }) => {
   
   // Helper to format distance text
@@ -46,26 +47,91 @@ const VehicleOptions = ({ results, pricingData }) => {
     { name: 'Rapido', price: pricingData.rapido_price, icon: '🛵' }
   ];
 
-  return (
-    <div className="results-container">
-      <h4>
-        Ride Distance: {distanceText}
-        <br />
-        Estimated Time: <em>{timeText}</em>
-      </h4>
+  // Inline styles for a clean, non-broken look
+  const styles = {
+    container: {
+      padding: '10px 0',
+      fontFamily: "'Inter', sans-serif",
+    },
+    statsRow: {
+      display: 'flex',
+      gap: '12px',
+      marginBottom: '20px',
+      marginTop: '10px'
+    },
+    statBadge: {
+      background: '#f0f4ff',
+      color: '#0056b3',
+      padding: '8px 12px',
+      borderRadius: '8px',
+      fontSize: '14px',
+      fontWeight: '600',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '6px'
+    },
+    list: {
+      listStyle: 'none',
+      padding: 0,
+      margin: 0,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '12px'
+    },
+    item: {
+      display: 'flex',
+      justifyContent: 'space-between', // Pushes Name left and Price right
+      alignItems: 'center',
+      padding: '16px',
+      border: '1px solid #e0e0e0',
+      borderRadius: '12px',
+      background: 'white',
+      boxShadow: '0 2px 4px rgba(0,0,0,0.03)',
+      transition: 'border-color 0.2s',
+      cursor: 'default'
+    },
+    leftSide: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px'
+    },
+    icon: {
+      fontSize: '24px',
+    },
+    name: {
+      fontSize: '16px',
+      fontWeight: '600',
+      color: '#333'
+    },
+    price: {
+      fontSize: '18px',
+      fontWeight: '700',
+      color: '#28a745'
+    }
+  };
 
-      <ul className="vehicle-list">
+  return (
+    <div style={styles.container}>
+      {/* Stats Row */}
+      <div style={styles.statsRow}>
+        <div style={styles.statBadge}>
+          <span>📍</span> {distanceText}
+        </div>
+        <div style={styles.statBadge}>
+          <span>⏱️</span> {timeText}
+        </div>
+      </div>
+
+      {/* Vehicle List */}
+      <ul style={styles.list}>
         {providers.map(provider => (
-          <li
-            key={provider.name}
-            className="vehicle-item"
-            style={{ cursor: 'default' }}
-          >
-            <span className="vehicle-icon">{provider.icon}</span>
-            <span className="vehicle-name">{provider.name}</span>
-            {/* Display the price from the ML model */}
-            <span className="vehicle-price">
-               {provider.price ? `₹ ${Math.round(provider.price)}` : 'N/A'}
+          <li key={provider.name} style={styles.item}>
+            <div style={styles.leftSide}>
+              <span style={styles.icon}>{provider.icon}</span>
+              <span style={styles.name}>{provider.name}</span>
+            </div>
+            <span style={styles.price}>
+               {provider.price ? `₹${Math.round(provider.price)}` : 'N/A'}
             </span>
           </li>
         ))}
@@ -75,6 +141,7 @@ const VehicleOptions = ({ results, pricingData }) => {
 };
 
 
+// --- Main HomePage Component ---
 const HomePage = () => {
   const navigate = useNavigate();
   const mapContainer = useRef(null);
@@ -102,6 +169,7 @@ const HomePage = () => {
   const startPos = useRef(0);
   const maxPos = useRef(0);
 
+  // Initialize Map
   useEffect(() => {
     if (map.current || !mapContainer.current) return;
 
@@ -142,14 +210,14 @@ const HomePage = () => {
     };
   }, []);
 
-  // When results are shown on mobile, snap the sidebar open so user can see options
+  // When results are shown on mobile, snap the sidebar open
   useEffect(() => {
     if (resultsshown && window.innerWidth <= 900) {
       setSidebarPosition(0);
     }
   }, [resultsshown]);
 
-  // UPDATED: Now fetches from your specific ML Endpoint
+  // --- UPDATED: Fetch Pricing from ML Model ---
   const fetchIntelligentPricing = async (source, destination, distanceMeters, durationSeconds) => {
     try {
       // 1. Convert units for the ML Model
@@ -184,6 +252,7 @@ const HomePage = () => {
     }
   };
 
+  // Handle Input Changes (Autocomplete)
   const handleInputChange = async (e, field) => {
     const value = e.target.value;
 
@@ -421,6 +490,7 @@ const HomePage = () => {
     setDropoffAddress(tempAddress);
   };
 
+  // Sidebar drag logic
   const handleTouchStart = (e) => {
     setIsDragging(true);
     startY.current = e.touches[0].clientY;
