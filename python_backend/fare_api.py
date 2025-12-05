@@ -6,7 +6,6 @@ import os
 
 app = Flask(__name__)
 
-# Correct CORS setup for Vercel → Render calls
 CORS(app, resources={
     r"/*": {
         "origins": [
@@ -18,7 +17,6 @@ CORS(app, resources={
 
 RAW_DATA_COLS = ['platform', 'vehicle_type', 'time_of_day']
 
-# Load model + data
 try:
     base_dir = os.path.dirname(os.path.abspath(__file__))
     model_path = os.path.join(base_dir, 'fare_model_pipeline.pkl')

@@ -19,119 +19,15 @@ const SwapIcon = () => (
 
 const Logo = () => <img src={logo3} alt="Routely Logo" className="logo3" />;
 
-
+// UPDATED: Simply displays the predictions from your ML Model
 const VehicleOptions = ({ results, pricingData }) => {
-
-  const [expandedVehicle, setExpandedVehicle] = useState(null);
-
-  const vehicleTypes = [
-    { name: 'Bike', icon: '🏍️', type: 'bike' },
-    { name: 'Auto', icon: '🛺', type: 'auto' },
-    { name: 'Mini', icon: '🚗', type: 'mini' },
-  ];
-
-
-  const handleToggle = (vehicleType) => {
-    if (expandedVehicle === vehicleType) {
-      setExpandedVehicle(null);
-    } else {
-      setExpandedVehicle(vehicleType);
-    }
-  };
-
-  const getBestPrice = (vehicleType) => {
-    if (!pricingData || !pricingData.estimates) return 'Calculating...';
-
-    const prices = [];
-    if (pricingData.estimates.uber && pricingData.estimates.uber[vehicleType]) {
-      prices.push(pricingData.estimates.uber[vehicleType].price);
-    }
-    if (pricingData.estimates.ola && pricingData.estimates.ola[vehicleType]) {
-      prices.push(pricingData.estimates.ola[vehicleType].price);
-    }
-    if (pricingData.estimates.rapido && pricingData.estimates.rapido[vehicleType]) {
-      prices.push(pricingData.estimates.rapido[vehicleType].price);
-    }
-
-    if (prices.length === 0) return 'N/A';
-
-    const bestPrice = Math.min(...prices);
-    return `₹ ${bestPrice}`;
-  };
-
-  const getServicePrices = (vehicleType) => {
-    if (!pricingData || !pricingData.estimates) return [];
-
-    const services = [];
-    if (pricingData.estimates.uber && pricingData.estimates.uber[vehicleType]) {
-      services.push({
-        name: 'Uber',
-        price: pricingData.estimates.uber[vehicleType].price,
-        surge: pricingData.estimates.uber[vehicleType].surge
-      });
-    }
-    if (pricingData.estimates.ola && pricingData.estimates.ola[vehicleType]) {
-      services.push({
-        name: 'Ola',
-        price: pricingData.estimates.ola[vehicleType].price,
-        surge: pricingData.estimates.ola[vehicleType].surge
-      });
-    }
-    if (pricingData.estimates.rapido && pricingData.estimates.rapido[vehicleType]) {
-      services.push({
-        name: 'Rapido',
-        price: pricingData.estimates.rapido[vehicleType].price,
-        surge: pricingData.estimates.rapido[vehicleType].surge
-      });
-    }
-
-    return services.sort((a, b) => a.price - b.price);
-  };
-
-
-  const getEstimatedTravelTime = (distanceMeters, timing) => {
-    
-    if (!Number.isFinite(distanceMeters) || distanceMeters <= 0) return '';
-
-    const km = distanceMeters / 1000;
-
-    // Determine base speed (km/h) by distance bucket to reflect urban patterns
-    let baseSpeedKmh;
-    if (km <= 1) baseSpeedKmh = 12;       // very short trips — low avg due to stops/traffic
-    else if (km <= 5) baseSpeedKmh = 18;  // inner-city
-    else if (km <= 15) baseSpeedKmh = 30; // medium trips
-    else baseSpeedKmh = 45;               // longer trips on faster roads
-
-    // Apply time-of-day traffic multipliers
-    let trafficMultiplier = 1.0;
-    if (timing && typeof timing === 'object') {
-      if (timing.isPeak) trafficMultiplier *= 1.3; // peak slowdown
-      if (timing.period === 'late_night') trafficMultiplier *= 0.8; // faster at night
-      if (timing.period === 'lunch') trafficMultiplier *= 1.05;
-      if (timing.isWeekend) trafficMultiplier *= 1.05;
-    }
-
-    // Convert to minutes (safeguard minimum base speed 5 km/h)
-    const timeHours = km / Math.max(5, baseSpeedKmh / trafficMultiplier);
-    let minutes = Math.max(1, Math.round(timeHours * 60));
-
-    // Add a small buffer for pickups and routing uncertainty: max(10% of time, 2 minutes)
-    const buffer = Math.max(Math.round(minutes * 0.1), 2);
-    minutes = minutes + buffer;
-
-    // Nicely format
-    if (minutes < 60) return `${minutes} mins`;
-    const hrs = Math.floor(minutes / 60);
-    const rem = minutes % 60;
-    return rem === 0 ? `${hrs} hr${hrs > 1 ? 's' : ''}` : `${hrs} hr ${rem} mins`;
-  };
-
-
-  // Prefer a precise duration from results.duration (seconds) if available
+  
+  // Helper to format distance text
   const distanceText = results.distance > 1000
     ? `${(results.distance / 1000).toFixed(1)} km`
     : `${results.distance} m`;
 
+  // Helper to format duration text
   const formatDuration = (secs) => {
     if (!Number.isFinite(secs) || secs <= 0) return '';
     const minutes = Math.round(secs / 60);
@@ -141,59 +37,38 @@ const VehicleOptions = ({ results, pricingData }) => {
     return rem === 0 ? `${hrs} hr${hrs > 1 ? 's' : ''}` : `${hrs} hr ${rem} mins`;
   };
 
-  const timeText = results.duration ? formatDuration(results.duration) : getEstimatedTravelTime(results.distance, pricingData.timing);
+  const timeText = formatDuration(results.duration);
+
+  // Define the providers based on your ML response keys
+  const providers = [
+    { name: 'Ola', price: pricingData.ola_price, icon: '🚖' },
+    { name: 'Uber', price: pricingData.uber_price, icon: '🚘' },
+    { name: 'Rapido', price: pricingData.rapido_price, icon: '🛵' }
+  ];
 
   return (
     <div className="results-container">
-
       <h4>
         Ride Distance: {distanceText}
         <br />
         Estimated Time: <em>{timeText}</em>
       </h4>
 
-      {pricingData.timing && (
-        <div className="timing-info">
-          <small>Today's day: {pricingData.timing.day}</small>
-        </div>
-      )}
       <ul className="vehicle-list">
-        {vehicleTypes.map(vehicle => {
-          const servicePrices = getServicePrices(vehicle.type);
-          const bestPrice = getBestPrice(vehicle.type);
-          const isExpanded = expandedVehicle === vehicle.type;
-
-          return (
-            <li
-              key={vehicle.name}
-              className="vehicle-item"
-              onClick={() => handleToggle(vehicle.type)}
-              style={{ cursor: 'pointer' }}
-            >
-              <span className="vehicle-icon">{vehicle.icon}</span>
-              <span className="vehicle-name">{vehicle.name}</span>
-              <span className="vehicle-price">{bestPrice}</span>
-
-              {isExpanded && (
-                <div className="service-breakdown">
-                  {servicePrices.map(service => (
-                    <div key={service.name} className="service-price">
-                      <span className="service-name">
-                        {service.name}
-                      </span>
-                      <span className="service-amount">
-                        {service.surge > 1.1 && (
-                          <span className="surge-badge">{service.surge}x</span>
-                        )}
-                        ₹{service.price}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </li>
-          );
-        })}
+        {providers.map(provider => (
+          <li
+            key={provider.name}
+            className="vehicle-item"
+            style={{ cursor: 'default' }}
+          >
+            <span className="vehicle-icon">{provider.icon}</span>
+            <span className="vehicle-name">{provider.name}</span>
+            {/* Display the price from the ML model */}
+            <span className="vehicle-price">
+               {provider.price ? `₹ ${Math.round(provider.price)}` : 'N/A'}
+            </span>
+          </li>
+        ))}
       </ul>
     </div>
   );
@@ -274,41 +149,38 @@ const HomePage = () => {
     }
   }, [resultsshown]);
 
-  const fetchIntelligentPricing = async (startAddress, endAddress) => {
+  // UPDATED: Now fetches from your specific ML Endpoint
+  const fetchIntelligentPricing = async (source, destination, distanceMeters, durationSeconds) => {
     try {
-      const backendUrl = import.meta.env.VITE_API_URL || 'https://routely-website-backend.onrender.com';
+      // 1. Convert units for the ML Model
+      // Distance: meters -> km
+      const distanceKm = (distanceMeters / 1000); 
+      // Duration: seconds -> minutes
+      const durationMin = (durationSeconds / 60);
 
-
-      // send client's local hour/day so server computes timing in user's local timezone
-      const now = new Date();
-      const response = await fetch(`${backendUrl}/api/pricing/estimates`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      // 2. POST request to your ML API
+      const response = await fetch("https://routely-website-137.onrender.com/predict_fares", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          startAddress,
-          endAddress,
-          clientHour: now.getHours(),
-          clientDay: now.getDay()
+          source: source,
+          destination: destination,
+          distance: distanceKm,
+          duration: durationMin
         })
       });
 
-
       if (!response.ok) {
-        throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+        throw new Error(`ML Server returned ${response.status}`);
       }
 
+      // 3. Return the JSON { ola_price, uber_price, rapido_price }
       const pricing = await response.json();
       return pricing;
+
     } catch (error) {
-
-      if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-        console.log('Network issue detected');
-        throw new Error('Cannot connect to pricing service. Please check if backend server is running.');
-      }
-
-      throw error;
+      console.error('Pricing fetch failed:', error);
+      throw new Error('Cannot connect to fare prediction service.');
     }
   };
 
@@ -350,7 +222,6 @@ const HomePage = () => {
         );
 
         const data = await response.json();
-        console.log('OLA API raw response:', data);
       
         let features = [];
         if (Array.isArray(data.predictions)) {
@@ -363,16 +234,9 @@ const HomePage = () => {
           features = data;
         }
 
-        
-        if (features.length > 0) {
-          const firstProps = features[0].properties || features[0];
-          console.log('First suggestion properties:', firstProps);
-        }
-       
         const normalized = features.map((f, idx) => {
           const props = f.properties || f;
           const geom = f.geometry || {};
-          // Try to extract coordinates from multiple possible fields
           let coords = null;
           if (Array.isArray(geom.coordinates) && geom.coordinates.length >= 2) coords = geom.coordinates;
           else if (Array.isArray(f.coordinates) && f.coordinates.length >= 2) coords = f.coordinates;
@@ -383,7 +247,7 @@ const HomePage = () => {
           } else if (props.location && (props.location.lng || props.location.lon) && (props.location.lat || props.location.latitude)) {
             coords = [props.location.lng ?? props.location.lon, props.location.lat ?? props.location.latitude];
           }
-          // Use Ola's structured_formatting for display
+          
           const mainText = props.structured_formatting?.main_text || props.name || props.label || props.display_name || props.text || '';
           const secondaryText = props.structured_formatting?.secondary_text || '';
           return {
@@ -397,7 +261,6 @@ const HomePage = () => {
             geometry: { coordinates: coords },
           };
         });
-        console.log('Normalized suggestions:', normalized);
 
         if (field === 'pickup') {
           setPickupSuggestions(normalized);
@@ -411,12 +274,10 @@ const HomePage = () => {
   };
 
   const handleSuggestionClick = (field, feature) => {
-    // Defensive: extract coordinates robustly
     let coords = feature?.geometry?.coordinates;
     if (!Array.isArray(coords) || coords.length < 2) {
       coords = null;
     }
-    // If still not found, try other possible locations
     if (!coords) {
       const props = feature?.properties || {};
       if (Array.isArray(feature?.coordinates) && feature.coordinates.length >= 2) coords = feature.coordinates;
@@ -432,12 +293,12 @@ const HomePage = () => {
     }
     let lon = parseFloat(coords[0]);
     let lat = parseFloat(coords[1]);
-    // Heuristic: swap if not in India bbox
+    
     const inIndia = (lo, la) => (la >= 6 && la <= 37 && lo >= 68 && lo <= 97);
     if (!inIndia(lon, lat) && inIndia(lat, lon)) {
       [lon, lat] = [lat, lon];
     }
-    // Use Ola's structured_formatting for address/label
+    
     const addressLabel = feature?.properties?.description || feature?.properties?.label || feature?.properties?.name || '';
     const addressName = feature?.properties?.name || feature?.properties?.label || '';
     if (field === 'pickup') {
@@ -466,7 +327,7 @@ const HomePage = () => {
     setPricingData(null);
 
     try {
-
+      // 1. Get Route Details (Distance/Duration) from OpenRouteService
       const routeResponse = await fetch(`https://api.openrouteservice.org/v2/directions/driving-car/geojson`, {
         method: 'POST',
         headers: {
@@ -480,19 +341,21 @@ const HomePage = () => {
         throw new Error('Failed to get route information');
       }
 
-  const routeData = await routeResponse.json();
-  const summary = routeData.features[0].properties.summary || {};
-  const distance = summary.distance;
-  const duration = summary.duration; // duration in seconds
+      const routeData = await routeResponse.json();
+      const summary = routeData.features[0].properties.summary || {};
+      const distance = summary.distance; // meters
+      const duration = summary.duration; // seconds
 
+      // 2. Fetch Pricing from your ML Model
+      // We pass the addresses and the exact distance/duration from the route service
+      const pricingResult = await fetchIntelligentPricing(
+        pickupAddress, 
+        dropoffAddress, 
+        distance, 
+        duration
+      );
 
-      const pricingResult = await fetchIntelligentPricing(pickupAddress, dropoffAddress);
-
-      if (!pricingResult.success) {
-        throw new Error(pricingResult.error || 'Failed to get pricing');
-      }
-
-
+      // 3. Render Map Route
       if (map.current && mapsLoaded && window.google && window.google.maps) {
         const directionsService = new window.google.maps.DirectionsService();
         const directionsRenderer = new window.google.maps.DirectionsRenderer();
@@ -527,14 +390,13 @@ const HomePage = () => {
           }
         });
 
-        // Fit map to bounds
         const bounds = new window.google.maps.LatLngBounds();
         bounds.extend({ lat: pickupCoords[1], lng: pickupCoords[0] });
         bounds.extend({ lat: dropoffCoords[1], lng: dropoffCoords[0] });
         map.current.fitBounds(bounds);
       }
 
-  setSearchResults({ distance, duration });
+      setSearchResults({ distance, duration });
       setPricingData(pricingResult);
       setresultsshown(true);
     } catch (error) {
@@ -568,7 +430,7 @@ const HomePage = () => {
   const handleTouchMove = (e) => {
     if (!isDragging) return;
     const clientY = e.touches[0].clientY;
-    const delta = startY.current - clientY; // positive when dragging up
+    const delta = startY.current - clientY; 
     const desired = Math.round(startPos.current - delta);
     const clamped = Math.max(0, Math.min(maxPos.current || 0, desired));
     setSidebarPosition(clamped);
@@ -581,7 +443,6 @@ const HomePage = () => {
   };
 
   const handleHandleClick = () => {
-    // toggle open/closed on tap
     setSidebarPosition(prev => (prev === 0 ? (maxPos.current || 0) : 0));
   };
 
@@ -608,11 +469,9 @@ const HomePage = () => {
       const peek = Math.min(140, Math.round(height * 0.35));
       const max = Math.max(0, height - peek);
       maxPos.current = max;
-      // Start collapsed (show only peek)
       setSidebarPosition(max);
     };
 
-    // Only initialize on small screens where sidebar is absolute
     if (window.innerWidth <= 900) setInitialSidebar();
     const onResize = () => { if (window.innerWidth <= 900) setInitialSidebar(); };
     window.addEventListener('resize', onResize);
@@ -699,7 +558,7 @@ const HomePage = () => {
 
               {!resultsshown && (
                 <button type="submit" className="submit-button" disabled={loading}>
-                  {loading ? 'Fetching...' : 'Compare ride prices'}
+                  {loading ? 'Calculating...' : 'Compare ride prices'}
                 </button>
               )}
             </form>
